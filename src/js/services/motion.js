@@ -76,6 +76,18 @@ export function shake(target) {
   run(target, { translateX: [0, -8, 8, -5, 5, -2, 0], duration: 420, ease: 'inOutSine' });
 }
 
+/** Emerald ring pulse that draws the eye to a field without focusing it. */
+export function attention(target) {
+  if (!isEnabled() || !target) return;
+  run(target, {
+    boxShadow: ['0 0 0 0px rgba(16, 185, 129, 0.75)', '0 0 0 8px rgba(16, 185, 129, 0)'],
+    duration: 900,
+    delay: 150,
+    loop: 1,
+    ease: 'outQuad',
+  });
+}
+
 /** Briefly tint a freshly added row emerald. */
 export function highlight(target) {
   if (!isEnabled() || !target) return;

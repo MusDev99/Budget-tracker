@@ -7,6 +7,9 @@ import { onTabChange } from './tabs.js';
 import { showToast } from './toast.js';
 
 let selectedCategory = DEFAULT_CATEGORY;
+
+/** A coarse primary pointer (finger) means focusing an input will open the on-screen keyboard. */
+const hasOnScreenKeyboard = () => window.matchMedia?.('(pointer: coarse)').matches ?? false;
 let els;
 
 /** Empty quantity means 1; anything unparsable yields NaN so validation can reject it. */
@@ -111,10 +114,19 @@ export function mount() {
     motion.pop(els.picker.querySelector(`[data-cat="${selectedCategory}"]`), 1.08);
   });
 
-  // Opening the Add tab by tap jumps straight into typing. Keyboard tab navigation keeps
-  // focus on the tab bar, and the initial page load doesn't pop the mobile keyboard.
   onTabChange((tab, { previous, viaKeyboard }) => {
-    if (tab === 'add' && previous && !viaKeyboard) els.name.focus();
+    // Leaving Add: close the on-screen keyboard instead of carrying it to another tab.
+    if (tab !== 'add') {
+      if (els.form.contains(document.activeElement)) document.activeElement.blur();
+      return;
+    }
+    if (!previous || viaKeyboard) return;
+
+    // Touch screens: never pop the keyboard just for opening the tab — glow the first field
+    // so the user knows where to tap. Mouse/trackpad devices have no on-screen keyboard,
+    // so jump straight into typing there.
+    if (hasOnScreenKeyboard()) motion.attention(els.name);
+    else els.name.focus();
   });
 
   renderCategoryPicker();
