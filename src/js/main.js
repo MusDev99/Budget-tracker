@@ -4,6 +4,7 @@
 import * as budgetCard from './components/budget-card.js';
 import * as expenseForm from './components/expense-form.js';
 import * as header from './components/header.js';
+import * as installPrompt from './components/install-prompt.js';
 import * as summaryCards from './components/summary-cards.js';
 import * as tabs from './components/tabs.js';
 import { showToast } from './components/toast.js';
@@ -15,7 +16,7 @@ import { toDateKey } from './utils/date.js';
 import { refreshIcons } from './utils/dom.js';
 
 // Order matters: tabs mount first so the initial activation doesn't trigger other components' tab listeners.
-const components = [tabs, header, summaryCards, budgetCard, expenseForm, transactionList];
+const components = [tabs, header, summaryCards, budgetCard, expenseForm, transactionList, installPrompt];
 
 function renderAll(state = getState()) {
   components.forEach((component) => component.render(state));

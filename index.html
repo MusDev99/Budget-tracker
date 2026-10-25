@@ -7,8 +7,18 @@
   <meta name="description" content="Daily Budget & Expense Tracker — quick on-the-go expense entry with daily budget tracking." />
   <title>Daily Budget Tracker</title>
 
+  <!-- PWA: installable + offline (see sw.js) -->
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png" />
+  <link rel="icon" type="image/svg+xml" href="assets/icons/icon.svg" />
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Budget" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/lucide@1.61.0/dist/umd/lucide.min.js"></script>
   <link rel="stylesheet" href="src/styles/main.css" />
   <!-- Fetch Anime.js in parallel with the app; motion.js imports it lazily and degrades if it fails. -->
   <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/animejs@4.5.0/dist/bundles/anime.esm.min.js" crossorigin />
@@ -32,6 +42,10 @@
         </div>
       </div>
       <div class="flex items-center gap-2">
+        <button id="installBtn" type="button" aria-label="Install app" title="Install app"
+          class="hidden min-h-[44px] min-w-[44px] rounded-xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 grid place-items-center hover:bg-emerald-500/20 active:scale-95 transition">
+          <i data-lucide="smartphone" class="h-5 w-5"></i>
+        </button>
         <button id="currencyBtn" type="button" aria-label="Toggle currency"
           class="min-h-[44px] min-w-[44px] px-3 rounded-xl border border-slate-800 bg-slate-900 text-sm font-semibold hover:bg-slate-800 active:scale-95 transition">
           MYR
@@ -56,6 +70,19 @@
   </header>
 
   <main class="max-w-xl mx-auto px-4 pt-4 pb-[calc(6rem+env(safe-area-inset-bottom))]">
+
+    <!-- iOS has no install prompt: explain Share → Add to Home Screen (install-prompt.js) -->
+    <div id="iosInstallHint" class="hidden mb-3 flex items-start gap-3 rounded-2xl border border-sky-500/30 bg-sky-500/10 p-3">
+      <div class="h-9 w-9 shrink-0 rounded-xl bg-sky-500/20 text-sky-300 grid place-items-center"><i data-lucide="smartphone" class="h-5 w-5"></i></div>
+      <p class="flex-1 text-sm text-slate-200">
+        Install this app: tap <i data-lucide="share" class="inline h-4 w-4 -mt-0.5 text-sky-300" aria-label="Share"></i>
+        <span class="font-semibold">Share</span>, then <span class="font-semibold">Add to Home Screen</span>.
+      </p>
+      <button id="iosInstallHintClose" type="button" aria-label="Dismiss"
+        class="min-h-[44px] min-w-[44px] -m-2 rounded-xl grid place-items-center text-slate-400 hover:text-slate-100">
+        <i data-lucide="x" class="h-4 w-4"></i>
+      </button>
+    </div>
 
     <!-- ===== Tab: Overview ===== -->
     <section id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" data-title="Overview" class="tab-panel space-y-3" hidden>
@@ -229,6 +256,14 @@
       </button>
     </div>
   </nav>
+
+  <!-- New service worker waiting (install-prompt.js → showUpdateBanner) -->
+  <div id="updateBanner" role="status" aria-live="polite"
+    class="hidden fixed inset-x-0 mx-auto w-[calc(100%-2rem)] max-w-md bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-50 flex items-center gap-3 rounded-2xl border border-slate-700 bg-slate-900 px-4 py-3 shadow-lg">
+    <i data-lucide="refresh-cw" class="h-5 w-5 shrink-0 text-emerald-400"></i>
+    <p class="flex-1 text-sm">A new version is ready.</p>
+    <button id="updateReloadBtn" type="button" class="min-h-[44px] px-4 rounded-xl bg-emerald-500 text-slate-950 text-sm font-semibold active:scale-95 transition">Reload</button>
+  </div>
 
   <div id="toast" role="status" aria-live="polite"
     class="hidden fixed inset-x-0 mx-auto w-max max-w-[calc(100%-2rem)] bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-50 rounded-xl bg-slate-100 text-slate-950 text-sm font-medium px-4 py-3 shadow-lg truncate"></div>

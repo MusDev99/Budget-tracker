@@ -6,6 +6,7 @@
 export const STORAGE_KEYS = Object.freeze({
   transactions: 'dbt.transactions.v1',
   settings: 'dbt.settings.v1',
+  iosHintDismissed: 'dbt.iosHintDismissed.v1',
 });
 
 export const CURRENCIES = Object.freeze([
