@@ -5,6 +5,7 @@ import * as motion from '../services/motion.js';
 import { formatDayHeading, formatTime } from '../utils/date.js';
 import { byId, debounce, escapeHtml, refreshIcons } from '../utils/dom.js';
 import { formatMoney } from '../utils/number.js';
+import { openEditSheet } from './edit-sheet.js';
 import { showToast } from './toast.js';
 
 const filters = { query: '', category: 'all' };
@@ -31,19 +32,22 @@ function rowHtml(tx, currency) {
   const name = escapeHtml(tx.name);
   const qtyText = tx.qty !== 1 ? `${formatMoney(tx.price, currency)} × ${+tx.qty.toFixed(3)}` : '';
   return `
-    <li data-id="${escapeHtml(tx.id)}" class="flex items-center gap-3 pl-3 pr-1 py-2">
-      <div class="h-9 w-9 shrink-0 rounded-xl grid place-items-center border ${category.badge}">
-        <i data-lucide="${category.icon}" class="h-4 w-4"></i>
-      </div>
-      <div class="min-w-0 flex-1">
-        <p class="text-sm font-medium truncate">${name}</p>
-        <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
-          <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-md border ${category.badge}">${category.label}</span>
-          <span class="text-[11px] text-slate-500">${formatTime(tx.ts)}</span>
-          ${qtyText ? `<span class="text-[11px] text-slate-500 tabular-nums">· ${qtyText}</span>` : ''}
-        </div>
-      </div>
-      <span class="text-sm font-semibold tabular-nums whitespace-nowrap">${formatMoney(tx.total, currency)}</span>
+    <li data-id="${escapeHtml(tx.id)}" class="flex items-center pr-1">
+      <button type="button" data-edit="${escapeHtml(tx.id)}" aria-label="Edit ${name}"
+        class="min-w-0 flex-1 min-h-[56px] flex items-center gap-3 pl-3 pr-2 py-2 text-left rounded-xl hover:bg-slate-800/50 active:bg-slate-800 transition">
+        <span class="h-9 w-9 shrink-0 rounded-xl grid place-items-center border ${category.badge}">
+          <i data-lucide="${category.icon}" class="h-4 w-4"></i>
+        </span>
+        <span class="min-w-0 flex-1">
+          <span class="block text-sm font-medium truncate">${name}</span>
+          <span class="flex items-center gap-1.5 mt-0.5 flex-wrap">
+            <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-md border ${category.badge}">${category.label}</span>
+            <span class="text-[11px] text-slate-500">${formatTime(tx.ts)}</span>
+            ${qtyText ? `<span class="text-[11px] text-slate-500 tabular-nums">· ${qtyText}</span>` : ''}
+          </span>
+        </span>
+        <span class="text-sm font-semibold tabular-nums whitespace-nowrap">${formatMoney(tx.total, currency)}</span>
+      </button>
       <button type="button" data-delete="${escapeHtml(tx.id)}" aria-label="Delete ${name}"
         class="min-h-[44px] min-w-[44px] rounded-xl grid place-items-center text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 active:scale-90 transition">
         <i data-lucide="trash-2" class="h-4 w-4"></i>
@@ -84,6 +88,9 @@ export function mount() {
 
   // Event delegation: one listener survives every re-render.
   byId('txList').addEventListener('click', (event) => {
+    const editButton = event.target.closest('[data-edit]');
+    if (editButton) return openEditSheet(editButton.dataset.edit);
+
     const button = event.target.closest('[data-delete]');
     if (!button || button.disabled) return;
     button.disabled = true; // ignore double taps while the row animates out
@@ -100,6 +107,7 @@ export function render({ transactions }) {
   const visible = filterTransactions(transactions, filters);
 
   byId('resultCount').textContent = transactions.length ? `${visible.length} of ${transactions.length}` : '';
+  byId('editHint').classList.toggle('hidden', visible.length === 0);
 
   list.innerHTML = visible.length
     ? groupByDay(visible).map((group) => groupHtml(group, currency)).join('')

@@ -15,6 +15,9 @@ export function refreshIcons() {
   if (window.lucide?.createIcons) window.lucide.createIcons();
 }
 
+/** A coarse primary pointer (finger) means focusing an input will open the on-screen keyboard. */
+export const hasOnScreenKeyboard = () => window.matchMedia?.('(pointer: coarse)').matches ?? false;
+
 export function debounce(fn, wait = 120) {
   let timer;
   return (...args) => {

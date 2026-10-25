@@ -227,7 +227,10 @@
           class="min-h-[44px] max-w-[40%] rounded-xl bg-slate-900 border border-slate-800 px-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
         </select>
       </div>
-      <p id="resultCount" class="text-xs text-slate-500 mb-3 px-1"></p>
+      <div class="flex items-center justify-between mb-3 px-1 text-xs text-slate-500">
+        <span id="resultCount"></span>
+        <span id="editHint" class="hidden flex items-center gap-1"><i data-lucide="pencil" class="h-3 w-3"></i>Tap an item to edit</span>
+      </div>
       <div id="txList" class="space-y-4"></div>
       <p class="mt-8 text-center text-xs text-slate-600">Data is stored on this device only. Export to CSV regularly.</p>
     </section>
@@ -251,6 +254,60 @@
       </button>
     </div>
   </nav>
+
+  <!-- ===== Edit expense sheet (components/edit-sheet.js) ===== -->
+  <dialog id="editSheet" class="edit-sheet bg-slate-900 text-slate-100 border border-slate-800" aria-labelledby="editTitle">
+    <form id="editForm" method="dialog" class="p-4 pt-2 space-y-3" autocomplete="off" novalidate>
+      <div class="mx-auto h-1.5 w-10 rounded-full bg-slate-700" aria-hidden="true"></div>
+      <div class="flex items-center justify-between gap-2">
+        <h2 id="editTitle" class="flex items-center gap-1.5 text-base font-semibold"><i data-lucide="pencil" class="h-4 w-4 text-emerald-400"></i>Edit expense</h2>
+        <!-- autofocus here (not an input) so opening the sheet never pops the phone keyboard -->
+        <button id="editClose" type="button" autofocus aria-label="Close"
+          class="min-h-[44px] min-w-[44px] -mr-2 rounded-xl grid place-items-center text-slate-400 hover:text-slate-100 hover:bg-slate-800 transition">
+          <i data-lucide="x" class="h-5 w-5"></i>
+        </button>
+      </div>
+
+      <div>
+        <label for="editName" class="block text-xs text-slate-400 mb-1">Item / Description</label>
+        <input id="editName" type="text" enterkeyhint="next" maxlength="80" required class="w-full min-h-[44px] rounded-xl bg-slate-950 border border-slate-800 px-3 text-base placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+      </div>
+      <div class="grid grid-cols-5 gap-2">
+        <div class="col-span-3">
+          <label for="editPrice" class="block text-xs text-slate-400 mb-1">Price (<span data-currency-label>MYR</span>)</label>
+          <input id="editPrice" type="number" inputmode="decimal" enterkeyhint="next" step="0.01" min="0" required class="w-full min-h-[44px] rounded-xl bg-slate-950 border border-slate-800 px-3 text-base placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 tabular-nums" />
+        </div>
+        <div class="col-span-2">
+          <label for="editQty" class="block text-xs text-slate-400 mb-1">Qty</label>
+          <input id="editQty" type="number" inputmode="decimal" enterkeyhint="done" step="any" min="0" placeholder="1" class="w-full min-h-[44px] rounded-xl bg-slate-950 border border-slate-800 px-3 text-base placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 tabular-nums" />
+        </div>
+      </div>
+      <div>
+        <label for="editDate" class="block text-xs text-slate-400 mb-1">Date</label>
+        <input id="editDate" type="date" required class="w-full min-h-[44px] rounded-xl bg-slate-950 border border-slate-800 px-3 text-base placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 [color-scheme:dark]" />
+      </div>
+      <div>
+        <span id="editCatLabel" class="block text-xs text-slate-400 mb-1">Category</span>
+        <div id="editCategoryPicker" role="radiogroup" aria-labelledby="editCatLabel" class="grid grid-cols-3 gap-2"></div>
+      </div>
+      <div class="flex items-center justify-between rounded-xl bg-slate-950 border border-slate-800 px-3 py-2">
+        <span class="text-xs text-slate-400">Total = Price × Qty</span>
+        <span id="editTotal" class="text-lg font-bold tabular-nums">0.00</span>
+      </div>
+      <p id="editError" class="hidden text-sm text-rose-400" role="alert"></p>
+
+      <div class="grid grid-cols-[auto_1fr] gap-2 pt-1">
+        <button id="editDelete" type="button" aria-label="Delete expense"
+          class="min-h-[48px] min-w-[48px] rounded-xl border border-rose-500/30 text-rose-400 grid place-items-center hover:bg-rose-500/10 active:scale-95 transition">
+          <i data-lucide="trash-2" class="h-5 w-5"></i>
+        </button>
+        <button id="editSave" type="submit"
+          class="min-h-[48px] rounded-xl bg-emerald-500 text-slate-950 font-semibold flex items-center justify-center gap-2 hover:bg-emerald-400 active:scale-[.98] transition">
+          <i data-lucide="check" class="h-5 w-5"></i>Save changes
+        </button>
+      </div>
+    </form>
+  </dialog>
 
   <!-- New service worker waiting (install-prompt.js → showUpdateBanner) -->
   <div id="updateBanner" role="status" aria-live="polite"

@@ -119,6 +119,34 @@ export function addTransaction({ name, price, qty, category }) {
   return tx;
 }
 
+/**
+ * Apply edits to an existing transaction. Changing `date` moves it to that day but keeps
+ * its time of day, so ordering within the day stays sensible.
+ * @param {string} id
+ * @param {Partial<Pick<Transaction, 'name' | 'price' | 'qty' | 'category' | 'date'>>} changes
+ * @returns {Transaction | null} the updated transaction, or null if it no longer exists
+ */
+export function updateTransaction(id, changes) {
+  const index = state.transactions.findIndex((t) => t.id === id);
+  if (index === -1) return null;
+
+  const current = state.transactions[index];
+  let { ts } = current;
+  if (changes.date && changes.date !== current.date) {
+    const [y, m, d] = changes.date.split('-').map(Number);
+    const moved = new Date(current.ts);
+    moved.setFullYear(y, m - 1, d);
+    ts = moved.getTime();
+  }
+
+  const updated = sanitizeTransaction({ ...current, ...changes, id: current.id, ts });
+  if (!updated) return null;
+  state.transactions[index] = updated;
+  persistTransactions();
+  emit();
+  return updated;
+}
+
 /** @returns {Transaction | null} the removed transaction */
 export function deleteTransaction(id) {
   const index = state.transactions.findIndex((t) => t.id === id);

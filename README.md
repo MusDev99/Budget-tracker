@@ -13,6 +13,7 @@ Vanilla HTML + ES modules + Tailwind CDN + Anime.js v4. **No build step**: it de
 | 🎯 Daily budget | Progress bar: 🟢 < 80% · 🟡 80–100% · 🔴 > 100%, plus one-tap presets |
 | 📌 Spent-today strip | Shown on every tab with a budget status dot; History tab badge counts today's items |
 | 🧾 History | Grouped by day, category badges, search + category filter, 1-tap delete |
+| ✏️ Edit | Tap any expense to open an edit sheet: name, price, qty, category, date (move to another day), delete |
 | 💱 Currency | Toggle MYR (RM) / USD ($) |
 | 💾 Persistence | `localStorage`; corrupt data falls back safely; syncs across tabs |
 | 🎬 Motion | Anime.js: intro sequence, tab transitions, count-up totals, growing bars, row highlight/collapse, form shake, springy toast |
@@ -37,7 +38,8 @@ budget-tracker/
 │       │   └── constants.js    # Storage keys, currencies, categories, thresholds
 │       ├── core/
 │       │   ├── store.js        # State, actions, pub/sub, validation and hydration
-│       │   └── selectors.js    # Pure derived data (today/month stats, filter, group)
+│       │   ├── selectors.js    # Pure derived data (today/month stats, filter, group)
+│       │   └── validation.js   # Pure expense validation shared by Add + Edit
 │       ├── services/
 │       │   ├── storage.js      # Safe localStorage read/write
 │       │   ├── motion.js       # Anime.js wrapper (lazy-loaded, no-op fallback)
@@ -51,6 +53,8 @@ budget-tracker/
 │       │   ├── summary-cards.js
 │       │   ├── budget-card.js
 │       │   ├── expense-form.js
+│       │   ├── edit-sheet.js   # <dialog> bottom sheet for editing an expense
+│       │   ├── category-picker.js  # Reusable category radio group
 │       │   ├── transaction-list.js
 │       │   └── toast.js
 │       └── utils/              # Small pure helpers

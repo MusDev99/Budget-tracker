@@ -64,6 +64,38 @@ input[type='number'] {
   border-radius: 12px;
 }
 
+/* ---------- Edit sheet (<dialog>) ---------- */
+/* Bottom sheet on phones, centred card on wider screens. */
+.edit-sheet {
+  width: 100%;
+  max-width: 36rem;
+  max-height: 92dvh;
+  margin: auto auto 0;
+  padding: 0 0 env(safe-area-inset-bottom);
+  border-radius: 1.25rem 1.25rem 0 0;
+  border-bottom: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.edit-sheet::backdrop {
+  background: rgba(2, 6, 23, 0.72);
+  backdrop-filter: blur(3px);
+}
+
+@media (min-width: 640px) {
+  .edit-sheet {
+    margin: auto;
+    border-radius: 1.25rem;
+    border-bottom: 1px solid #1e293b;
+  }
+}
+
+/* Lock the page behind an open sheet (iOS scrolls the background otherwise). */
+html.sheet-open {
+  overflow: hidden;
+}
+
 /* ---------- Coin hero (animated by services/motion.js) ---------- */
 /* Real 3D flip: an HTML element with two SVG faces back to back. */
 .coin-stage {

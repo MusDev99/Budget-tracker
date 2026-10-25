@@ -113,7 +113,24 @@ export function toastIn(target) {
   run(target, { opacity: { from: 0 }, translateY: { from: 24 }, scale: { from: 0.94 }, duration: 520, ease: 'outBack' });
 }
 
+/** Bottom sheet: slide up from below. */
+export function sheetIn(target) {
+  if (!isEnabled()) return;
+  run(target, { translateY: { from: '100%' }, opacity: { from: 0.4 }, duration: 420, ease: 'outExpo' });
+}
+
 // ---------- Exits ----------
+
+/** Bottom sheet: slide back down. Always resolves, even with animations off. */
+export function sheetOut(target) {
+  if (!isEnabled()) return Promise.resolve();
+  return new Promise((resolve) => {
+    anime.animate(target, { translateY: '100%', opacity: 0.4, duration: 240, ease: 'inQuad', onComplete: (a) => {
+      anime.cleanInlineStyles(a);
+      resolve();
+    } });
+  });
+}
 
 /** Collapse a row out of the list. Always resolves, even with animations off. */
 export function collapse(target) {
