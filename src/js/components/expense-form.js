@@ -1,5 +1,6 @@
 import { CATEGORIES, DEFAULT_CATEGORY } from '../config/constants.js';
 import { addTransaction, getCurrency } from '../core/store.js';
+import * as motion from '../services/motion.js';
 import { byId, refreshIcons } from '../utils/dom.js';
 import { formatMoney, round2 } from '../utils/number.js';
 import { onTabChange } from './tabs.js';
@@ -25,6 +26,7 @@ function showError(message, focusEl) {
   els.error.textContent = message;
   els.error.classList.toggle('hidden', !message);
   focusEl?.focus();
+  if (message) motion.shake(focusEl);
 }
 
 /** @returns {{name: string, price: number, qty: number} | null} */
@@ -52,6 +54,7 @@ function submit() {
   els.form.reset();
   updatePreview();
   els.name.focus();
+  motion.pop(els.submit, 1.05);
   showToast(`Added ${tx.name} · ${formatMoney(tx.total, getCurrency())}`);
 }
 
@@ -88,6 +91,7 @@ export function mount() {
     preview: byId('previewTotal'),
     error: byId('formError'),
     picker: byId('categoryPicker'),
+    submit: byId('expenseForm').querySelector('[type="submit"]'),
   };
 
   els.form.addEventListener('submit', (event) => {
@@ -104,6 +108,7 @@ export function mount() {
     if (!button) return;
     selectedCategory = button.dataset.cat;
     renderCategoryPicker();
+    motion.pop(els.picker.querySelector(`[data-cat="${selectedCategory}"]`), 1.08);
   });
 
   // Opening the Add tab by tap jumps straight into typing. Keyboard tab navigation keeps

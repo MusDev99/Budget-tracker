@@ -40,3 +40,9 @@ export const BUDGET_PRESETS = Object.freeze([30, 50, 80, 100]);
 /** Tab order matches the bottom bar; "add" is the default for quick on-the-go entry. */
 export const TAB_IDS = Object.freeze(['overview', 'add', 'budget', 'history']);
 export const DEFAULT_TAB = 'add';
+
+/** Anime.js v4 ESM bundle — pinned so a new release can't change behaviour under us. */
+export const ANIME_URL = 'https://cdn.jsdelivr.net/npm/animejs@4.5.0/dist/bundles/anime.esm.min.js';
+
+/** How long the first render waits for Anime.js before rendering without the intro. */
+export const MOTION_LOAD_TIMEOUT_MS = 500;

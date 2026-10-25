@@ -1,12 +1,16 @@
 import { CATEGORIES, CATEGORY_MAP } from '../config/constants.js';
 import { filterTransactions, groupByDay } from '../core/selectors.js';
 import { deleteTransaction, getCurrency, getState } from '../core/store.js';
+import * as motion from '../services/motion.js';
 import { formatDayHeading, formatTime } from '../utils/date.js';
 import { byId, debounce, escapeHtml, refreshIcons } from '../utils/dom.js';
 import { formatMoney } from '../utils/number.js';
 import { showToast } from './toast.js';
 
 const filters = { query: '', category: 'all' };
+
+/** Ids already shown once — anything new after the first render gets highlighted. */
+let knownIds = null;
 
 function emptyStateHtml(isFiltered) {
   const [icon, title, hint] = isFiltered
@@ -27,7 +31,7 @@ function rowHtml(tx, currency) {
   const name = escapeHtml(tx.name);
   const qtyText = tx.qty !== 1 ? `${formatMoney(tx.price, currency)} × ${+tx.qty.toFixed(3)}` : '';
   return `
-    <li class="flex items-center gap-3 pl-3 pr-1 py-2">
+    <li data-id="${escapeHtml(tx.id)}" class="flex items-center gap-3 pl-3 pr-1 py-2">
       <div class="h-9 w-9 shrink-0 rounded-xl grid place-items-center border ${category.badge}">
         <i data-lucide="${category.icon}" class="h-4 w-4"></i>
       </div>
@@ -81,9 +85,12 @@ export function mount() {
   // Event delegation: one listener survives every re-render.
   byId('txList').addEventListener('click', (event) => {
     const button = event.target.closest('[data-delete]');
-    if (!button) return;
-    const removed = deleteTransaction(button.dataset.delete);
-    if (removed) showToast(`Deleted ${removed.name}`);
+    if (!button || button.disabled) return;
+    button.disabled = true; // ignore double taps while the row animates out
+    motion.collapse(button.closest('li')).then(() => {
+      const removed = deleteTransaction(button.dataset.delete);
+      if (removed) showToast(`Deleted ${removed.name}`);
+    });
   });
 }
 
@@ -97,6 +104,13 @@ export function render({ transactions }) {
   list.innerHTML = visible.length
     ? groupByDay(visible).map((group) => groupHtml(group, currency)).join('')
     : emptyStateHtml(Boolean(filters.query.trim()) || filters.category !== 'all');
+
+  if (knownIds) {
+    transactions
+      .filter((tx) => !knownIds.has(tx.id))
+      .forEach((tx) => motion.highlight(list.querySelector(`li[data-id="${CSS.escape(tx.id)}"]`)));
+  }
+  knownIds = new Set(transactions.map((tx) => tx.id));
 
   refreshIcons();
 }

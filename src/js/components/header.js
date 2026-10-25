@@ -1,6 +1,7 @@
 import { selectBudgetStatus, selectTodayStats } from '../core/selectors.js';
 import { cycleCurrency, getCurrency, getState } from '../core/store.js';
 import { exportTransactionsCsv } from '../services/export.js';
+import * as motion from '../services/motion.js';
 import { formatLongDate } from '../utils/date.js';
 import { byId } from '../utils/dom.js';
 import { formatMoney } from '../utils/number.js';
@@ -28,7 +29,7 @@ export function render({ transactions, settings }) {
   document.querySelectorAll('[data-currency-label]').forEach((el) => (el.textContent = currency.code));
 
   // "Spent today" strip + budget status dot
-  byId('headerToday').textContent = formatMoney(today.total, currency);
+  motion.countTo(byId('headerToday'), today.total, (n) => formatMoney(n, currency));
   const dot = byId('headerBudgetDot');
   dot.className = 'h-2.5 w-2.5 rounded-full';
   if (settings.dailyBudget) dot.classList.add(DOT_COLORS[selectBudgetStatus(today.total, settings.dailyBudget).level]);
@@ -37,5 +38,8 @@ export function render({ transactions, settings }) {
   // Today's item count on the History tab
   const badge = byId('historyBadge');
   badge.textContent = today.count > 99 ? '99+' : String(today.count);
+  const grew = Number(badge.dataset.count ?? today.count) < today.count;
+  badge.dataset.count = today.count;
   badge.classList.toggle('hidden', today.count === 0);
+  if (grew) motion.pop(badge, 1.4);
 }

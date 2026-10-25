@@ -1,7 +1,7 @@
 # 💰 Budget Tracker
 
 Mobile-first **Daily Budget & Expense Tracker** for quick, on-the-go entry.
-Vanilla HTML + ES modules + Tailwind CDN. **No build step**: it deploys straight to GitHub Pages.
+Vanilla HTML + ES modules + Tailwind CDN + Anime.js v4. **No build step**: it deploys straight to GitHub Pages.
 
 ## ✨ Features
 
@@ -15,6 +15,8 @@ Vanilla HTML + ES modules + Tailwind CDN. **No build step**: it deploys straight
 | 🧾 History | Grouped by day, category badges, search + category filter, 1-tap delete |
 | 💱 Currency | Toggle MYR (RM) / USD ($) |
 | 💾 Persistence | `localStorage`; corrupt data falls back safely; syncs across tabs |
+| 🎬 Motion | Anime.js: intro sequence, tab transitions, count-up totals, growing bars, row highlight/collapse, form shake, springy toast |
+| 🌍 World hero | Animated SVG on Overview: globe grid draws itself, route arc draws, plane flies the route on a loop |
 | 📤 Export | 1-tap CSV (Excel-friendly; cells that look like formulas are escaped) |
 
 ## 🗂️ Project structure
@@ -34,6 +36,7 @@ budget-tracker/
 │       │   └── selectors.js    # Pure derived data (today/month stats, filter, group)
 │       ├── services/
 │       │   ├── storage.js      # Safe localStorage read/write
+│       │   ├── motion.js       # Anime.js wrapper (lazy-loaded, no-op fallback)
 │       │   └── export.js       # CSV build + browser download
 │       ├── components/         # UI modules, each exposes mount() + render(state)
 │       │   ├── tabs.js         # Bottom tab bar + #hash routing (ARIA tabs pattern)
@@ -69,6 +72,8 @@ budget-tracker/
 - **Pure selectors** keep the business logic testable without a DOM.
 - **Event delegation** on lists, so re-renders don't leak listeners.
 - **Safe rendering**: all user text goes through `escapeHtml` before `innerHTML`.
+- **Motion that can't break the app**: Anime.js is version-pinned, preloaded, and imported lazily.
+  If the CDN fails or the user prefers reduced motion, every helper simply applies the final state.
 
 ## 🚀 Run locally
 

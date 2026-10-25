@@ -2,7 +2,11 @@ import { BUDGET_PRESETS } from '../config/constants.js';
 import { selectBudgetStatus, selectTodayStats } from '../core/selectors.js';
 import { getCurrency, setDailyBudget } from '../core/store.js';
 import { byId } from '../utils/dom.js';
+import * as motion from '../services/motion.js';
 import { formatMoney } from '../utils/number.js';
+import { onTabChange } from './tabs.js';
+
+let lastWidth = 0;
 import { showToast } from './toast.js';
 
 const LEVEL_STYLES = {
@@ -39,8 +43,12 @@ export function mount() {
 
   byId('budgetPresets').addEventListener('click', (event) => {
     const button = event.target.closest('[data-preset]');
-    if (button) saveBudget(Number(button.dataset.preset));
+    if (!button) return;
+    motion.pop(button);
+    saveBudget(Number(button.dataset.preset));
   });
+
+  onTabChange((tab) => tab === 'budget' && motion.growWidth(byId('budgetBody').querySelector('[data-bar]')));
 }
 
 export function render({ transactions, settings }) {
@@ -52,6 +60,7 @@ export function render({ transactions, settings }) {
 
   if (!budget) {
     body.innerHTML = `<p class="text-sm text-slate-500">No target set. Pick a preset or enter a daily limit below.</p>`;
+    lastWidth = 0;
     return;
   }
 
@@ -64,7 +73,7 @@ export function render({ transactions, settings }) {
   body.innerHTML = `
     <div class="flex items-end justify-between gap-2">
       <div>
-        <div class="text-3xl font-bold tabular-nums tracking-tight">${formatMoney(spent, currency)}</div>
+        <div data-spent class="text-3xl font-bold tabular-nums tracking-tight">${formatMoney(spent, currency)}</div>
         <div class="text-xs text-slate-500 mt-0.5">of ${formatMoney(budget, currency)} daily limit</div>
       </div>
       <div class="text-right">
@@ -74,9 +83,13 @@ export function render({ transactions, settings }) {
     </div>
     <div class="mt-3 h-3 w-full rounded-full bg-slate-800 overflow-hidden" role="progressbar"
          aria-label="Daily budget used" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(width)}">
-      <div class="h-full ${style.bar} rounded-full transition-all duration-500" style="width:${width.toFixed(1)}%"></div>
+      <div data-bar class="h-full ${style.bar} rounded-full" style="width:${width.toFixed(1)}%"></div>
     </div>
     <p class="mt-2 text-sm ${remaining < 0 ? 'text-rose-400' : 'text-slate-400'}">
       ${remaining < 0 ? `Over budget by ${formatMoney(-remaining, currency)}` : `${formatMoney(remaining, currency)} left today`}
     </p>`;
+
+  // innerHTML rendered the final width; tween from where the bar was before.
+  if (width !== lastWidth) motion.growWidth(body.querySelector('[data-bar]'), `${lastWidth}%`);
+  lastWidth = width;
 }

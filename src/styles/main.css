@@ -64,36 +64,25 @@ input[type='number'] {
   border-radius: 12px;
 }
 
-/* ---------- Tab panels ---------- */
-.tab-panel:not([hidden]) {
-  animation: panel-in 0.18s ease-out;
+/* ---------- World SVG (animated by services/motion.js) ---------- */
+/* Let Anime.js scale SVG groups around their own centre, not the SVG origin. */
+.world [data-world-globe],
+.world [data-world-dot],
+.world [data-world-pulse] {
+  transform-box: fill-box;
+  transform-origin: center;
 }
 
-@keyframes panel-in {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
+/* The plane and pulse rings start hidden; motion.js fades them in. */
+.world [data-world-plane],
+.world [data-world-pulse] {
+  opacity: 0;
 }
 
-/* ---------- Toast ---------- */
-.toast-enter {
-  animation: toast-in 0.2s ease-out;
-}
-
-@keyframes toast-in {
-  from {
-    opacity: 0;
-    transform: translate(-50%, 8px);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, 0);
-  }
+/* No Anime.js (CDN blocked) or reduced motion: show the finished drawing, no plane. */
+.world.is-static [data-world-plane],
+.world.is-static [data-world-pulse] {
+  display: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -3,6 +3,7 @@
  * Follows the WAI-ARIA tabs pattern: roving tabindex + Arrow/Home/End keys.
  */
 import { DEFAULT_TAB, TAB_IDS } from '../config/constants.js';
+import * as motion from '../services/motion.js';
 import { byId } from '../utils/dom.js';
 
 const listeners = new Set();
@@ -34,6 +35,7 @@ export function activateTab(id, { focusTab = false, updateUrl = true } = {}) {
     tab.setAttribute('aria-selected', String(selected));
     tab.tabIndex = selected ? 0 : -1;
     if (selected && focusTab) tab.focus();
+    if (selected && previous) motion.pop(tab.querySelector('svg, i'), 1.25);
   });
 
   document.querySelectorAll('[role="tabpanel"]').forEach((panel) => {
@@ -46,6 +48,7 @@ export function activateTab(id, { focusTab = false, updateUrl = true } = {}) {
   // replaceState: switching tabs shouldn't flood the browser back stack.
   if (updateUrl) history.replaceState(null, '', `#${id}`);
   window.scrollTo({ top: 0 });
+  if (previous) motion.enter(panel.children);
 
   listeners.forEach((listener) => listener(id, { previous, viaKeyboard: focusTab }));
 }
