@@ -42,6 +42,13 @@ export const BUDGET_PRESETS = Object.freeze([30, 50, 80, 100]);
 export const TAB_IDS = Object.freeze(['overview', 'add', 'budget', 'history']);
 export const DEFAULT_TAB = 'add';
 
+/**
+ * Coin toss timing shared by the animation (motion.js) and the sound (sound.js) so the
+ * landing "ching" lands exactly when the coin does. `bounce` = landing → top of the little
+ * hop, so the coin touches down again at land + 2 × bounce.
+ */
+export const COIN_TOSS_MS = Object.freeze({ air: 460, fall: 420, bounce: 160 });
+
 /** Anime.js v4 ESM bundle — pinned so a new release can't change behaviour under us. */
 export const ANIME_URL = 'https://cdn.jsdelivr.net/npm/animejs@4.5.0/dist/bundles/anime.esm.min.js';
 

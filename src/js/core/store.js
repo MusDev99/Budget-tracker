@@ -31,7 +31,7 @@ import { round2 } from '../utils/number.js';
 const state = {
   /** @type {Transaction[]} */
   transactions: [],
-  settings: { currency: DEFAULT_CURRENCY, dailyBudget: 0 },
+  settings: { currency: DEFAULT_CURRENCY, dailyBudget: 0, soundOn: true },
 };
 
 const listeners = new Set();
@@ -59,11 +59,12 @@ export function sanitizeTransaction(raw) {
   };
 }
 
-function sanitizeSettings(raw) {
+export function sanitizeSettings(raw) {
   const budget = Number(raw?.dailyBudget);
   return {
     currency: CURRENCIES.some((c) => c.code === raw?.currency) ? raw.currency : DEFAULT_CURRENCY,
     dailyBudget: Number.isFinite(budget) && budget > 0 ? round2(budget) : 0,
+    soundOn: raw?.soundOn !== false, // default on; only an explicit false mutes
   };
 }
 
@@ -133,6 +134,13 @@ export function setDailyBudget(amount) {
   persistSettings();
   emit();
   return state.settings.dailyBudget;
+}
+
+export function toggleSound() {
+  state.settings.soundOn = !state.settings.soundOn;
+  persistSettings();
+  emit();
+  return state.settings.soundOn;
 }
 
 export function cycleCurrency() {

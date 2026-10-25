@@ -5,7 +5,7 @@
  * every helper degrades to "apply the final state instantly". Animations are also skipped
  * when the user prefers reduced motion.
  */
-import { ANIME_URL, MOTION_LOAD_TIMEOUT_MS } from '../config/constants.js';
+import { ANIME_URL, COIN_TOSS_MS, MOTION_LOAD_TIMEOUT_MS } from '../config/constants.js';
 
 /** @type {typeof import('animejs') | null} */
 let anime = null;
@@ -173,8 +173,7 @@ export function playCoin(stage) {
   const coin = stage.querySelector('[data-coin]');
   const shadow = stage.querySelector('[data-coin-shadow]');
   const sparkles = stage.querySelectorAll('[data-coin-sparkle]');
-  const air = 460;
-  const fall = 420;
+  const { air, fall, bounce } = COIN_TOSS_MS;
   const land = air + fall;
 
   coinTimeline = anime
@@ -182,15 +181,17 @@ export function playCoin(stage) {
     .add(coin, { translateY: [0, -78], duration: air, ease: 'outQuad' }, 0)
     .add(coin, { translateY: [-78, 0], duration: fall, ease: 'inQuad' }, air)
     .add(coin, { rotateY: [0, 1800], duration: land, ease: 'outSine' }, 0)
-    .add(coin, { translateY: [0, -12, 0], duration: 320, ease: 'outQuad' }, land)
+    .add(coin, { translateY: [0, -12, 0], duration: bounce * 2, ease: 'outQuad' }, land)
     .add(shadow, { scaleX: [1, 0.45], opacity: [0.9, 0.3], duration: air, ease: 'outQuad' }, 0)
     .add(shadow, { scaleX: [0.45, 1], opacity: [0.3, 0.9], duration: fall, ease: 'inQuad' }, air)
     .add(sparkles, { scale: [0, 1.2, 0], opacity: [0, 1, 0], rotate: [0, 90], duration: 650, delay: anime.stagger(45), ease: 'outQuad' }, land - 40);
 }
 
-/** Tap to flip: restart the toss from the ground. */
+/** Tap to flip: restart the toss from the ground. @returns {boolean} whether the coin animated */
 export function tossCoin() {
-  coinTimeline?.restart();
+  if (!coinTimeline) return false;
+  coinTimeline.restart();
+  return true;
 }
 
 /** Stop the loop while the Overview tab is hidden. */

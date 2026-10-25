@@ -88,6 +88,10 @@
     <section id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" data-title="Overview" class="tab-panel space-y-3" hidden>
       <!-- Coin hero: tap to flip; animated by services/motion.js → playCoin() -->
       <div class="relative overflow-hidden rounded-2xl border border-slate-800 bg-gradient-to-b from-amber-500/10 via-slate-900 to-slate-900 px-4 pt-2 pb-4">
+        <button id="soundBtn" type="button" aria-pressed="true" aria-label="Coin sound"
+          class="absolute right-2 top-2 z-10 min-h-[44px] min-w-[44px] rounded-xl grid place-items-center text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 transition">
+          <i data-lucide="volume-2" class="h-5 w-5"></i>
+        </button>
         <div id="coinStage" class="coin-stage">
           <span data-coin-sparkle class="coin-sparkle" style="left:calc(50% + -74px);top:62px"></span>
           <span data-coin-sparkle class="coin-sparkle" style="left:calc(50% + -52px);top:24px"></span>

@@ -1,13 +1,13 @@
 import { BUDGET_PRESETS } from '../config/constants.js';
 import { selectBudgetStatus, selectTodayStats } from '../core/selectors.js';
 import { getCurrency, setDailyBudget } from '../core/store.js';
-import { byId } from '../utils/dom.js';
 import * as motion from '../services/motion.js';
+import { byId } from '../utils/dom.js';
 import { formatMoney } from '../utils/number.js';
 import { onTabChange } from './tabs.js';
+import { showToast } from './toast.js';
 
 let lastWidth = 0;
-import { showToast } from './toast.js';
 
 const LEVEL_STYLES = {
   ok:      { bar: 'bg-emerald-500', text: 'text-emerald-400', label: 'On track' },

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { sanitizeTransaction } from '../src/js/core/store.js';
+import { sanitizeSettings, sanitizeTransaction } from '../src/js/core/store.js';
 import { toCsv, toCsvCell } from '../src/js/utils/csv.js';
 import { formatMoney, round2 } from '../src/js/utils/number.js';
 
@@ -19,6 +19,13 @@ test('toCsvCell quotes and blocks formula injection', () => {
   assert.equal(toCsvCell('say "hi"'), '"say ""hi"""');
   assert.equal(toCsvCell('=SUM(A1)'), "'=SUM(A1)");
   assert.equal(toCsv([['x', 1], ['y', 2]]), 'x,1\r\ny,2');
+});
+
+test('sound setting defaults on and only an explicit false mutes', () => {
+  assert.equal(sanitizeSettings({}).soundOn, true);
+  assert.equal(sanitizeSettings(null).soundOn, true);
+  assert.equal(sanitizeSettings({ soundOn: 'yes' }).soundOn, true);
+  assert.equal(sanitizeSettings({ soundOn: false }).soundOn, false);
 });
 
 test('sanitizeTransaction rejects garbage and recomputes total', () => {

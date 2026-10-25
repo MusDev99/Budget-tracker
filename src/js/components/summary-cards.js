@@ -1,9 +1,10 @@
 import { CATEGORY_MAP } from '../config/constants.js';
 import { selectCategoryBreakdown, selectMonthStats, selectTodayStats } from '../core/selectors.js';
-import { getCurrency } from '../core/store.js';
+import { getCurrency, toggleSound } from '../core/store.js';
 import * as motion from '../services/motion.js';
+import * as sound from '../services/sound.js';
 import { toMonthKey } from '../utils/date.js';
-import { byId } from '../utils/dom.js';
+import { byId, refreshIcons } from '../utils/dom.js';
 import { formatMoney } from '../utils/number.js';
 import { getActiveTab, onTabChange } from './tabs.js';
 
@@ -47,12 +48,32 @@ export function mount() {
   onTabChange((tab) => (tab === 'overview' ? playOverview() : motion.pauseCoin()));
 
   byId('coinBtn').addEventListener('click', () => {
-    motion.tossCoin();
+    // Sound only on a real tap — the automatic loop stays silent.
+    if (motion.tossCoin()) sound.playCoinToss();
+    else sound.playCoinChing();
     navigator.vibrate?.(12);
+  });
+
+  const soundBtn = byId('soundBtn');
+  if (!sound.isSupported()) soundBtn.classList.add('hidden');
+  soundBtn.addEventListener('click', () => {
+    if (toggleSound()) sound.playCoinChing(); // audible confirmation when turning it on
+    motion.pop(soundBtn);
   });
 }
 
-export function render({ transactions }) {
+function renderSoundToggle(soundOn) {
+  sound.setMuted(!soundOn);
+  const button = byId('soundBtn');
+  if (button.getAttribute('aria-pressed') === String(soundOn) && button.querySelector('svg')) return;
+  button.setAttribute('aria-pressed', String(soundOn));
+  button.setAttribute('aria-label', soundOn ? 'Mute coin sound' : 'Unmute coin sound');
+  button.innerHTML = `<i data-lucide="${soundOn ? 'volume-2' : 'volume-x'}" class="h-5 w-5"></i>`;
+  refreshIcons();
+}
+
+export function render({ transactions, settings }) {
+  renderSoundToggle(settings.soundOn);
   const currency = getCurrency();
   const today = selectTodayStats(transactions);
   const month = selectMonthStats(transactions);

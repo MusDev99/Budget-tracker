@@ -9,7 +9,7 @@
  * RELEASE: bump CACHE_VERSION whenever any file in APP_SHELL changes, so clients pick up
  * the new files and the in-app "update available" banner appears.
  */
-const CACHE_VERSION = 'v3';
+const CACHE_VERSION = 'v4';
 const SHELL_CACHE = `budget-shell-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `budget-runtime-${CACHE_VERSION}`;
 
@@ -40,6 +40,7 @@ const APP_SHELL = [
   './src/js/services/export.js',
   './src/js/services/motion.js',
   './src/js/services/pwa.js',
+  './src/js/services/sound.js',
   './src/js/services/storage.js',
   './src/js/utils/csv.js',
   './src/js/utils/date.js',
