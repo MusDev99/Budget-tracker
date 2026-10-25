@@ -64,25 +64,78 @@ input[type='number'] {
   border-radius: 12px;
 }
 
-/* ---------- World SVG (animated by services/motion.js) ---------- */
-/* Let Anime.js scale SVG groups around their own centre, not the SVG origin. */
-.world [data-world-globe],
-.world [data-world-dot],
-.world [data-world-pulse] {
-  transform-box: fill-box;
-  transform-origin: center;
+/* ---------- Coin hero (animated by services/motion.js) ---------- */
+/* Real 3D flip: an HTML element with two SVG faces back to back. */
+.coin-stage {
+  position: relative;
+  height: 168px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 22px;
+  perspective: 700px;
 }
 
-/* The plane and pulse rings start hidden; motion.js fades them in. */
-.world [data-world-plane],
-.world [data-world-pulse] {
+.coin {
+  position: relative;
+  z-index: 1;
+  width: 96px;
+  height: 96px;
+  border-radius: 9999px;
+  transform-style: preserve-3d;
+  cursor: pointer;
+  /* Button reset that doesn't depend on Tailwind's preflight. */
+  padding: 0;
+  border: 0;
+  background: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.coin:focus-visible {
+  outline: 2px solid #fbbf24;
+  outline-offset: 4px;
+}
+
+.coin-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  filter: drop-shadow(0 6px 14px rgba(245, 158, 11, 0.25));
+}
+
+.coin-face svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.coin-back {
+  transform: rotateY(180deg);
+}
+
+.coin-shadow {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  width: 84px;
+  height: 14px;
+  margin-left: -42px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(0, 0, 0, 0.6), transparent);
+}
+
+/* Four-point sparkles that burst when the coin lands. */
+.coin-sparkle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  margin-left: -6px;
+  background: #fcd34d;
+  clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
   opacity: 0;
-}
-
-/* No Anime.js (CDN blocked) or reduced motion: show the finished drawing, no plane. */
-.world.is-static [data-world-plane],
-.world.is-static [data-world-pulse] {
-  display: none;
+  pointer-events: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

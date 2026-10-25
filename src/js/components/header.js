@@ -27,6 +27,7 @@ export function render({ transactions, settings }) {
   byId('todayLabel').textContent = formatLongDate();
   byId('currencyBtn').textContent = currency.code;
   document.querySelectorAll('[data-currency-label]').forEach((el) => (el.textContent = currency.code));
+  document.querySelectorAll('[data-currency-symbol]').forEach((el) => (el.textContent = currency.symbol));
 
   // "Spent today" strip + budget status dot
   motion.countTo(byId('headerToday'), today.total, (n) => formatMoney(n, currency));

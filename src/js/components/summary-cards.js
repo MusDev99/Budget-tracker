@@ -9,7 +9,7 @@ import { getActiveTab, onTabChange } from './tabs.js';
 
 /** Animate the Overview's visuals; called on tab open and on the intro. */
 export function playOverview() {
-  motion.playWorld(byId('worldSvg'));
+  motion.playCoin(byId('coinStage'));
   motion.growWidth(byId('categoryBreakdown').querySelectorAll('[data-bar]'));
 }
 
@@ -44,7 +44,12 @@ function breakdownHtml(breakdown, currency) {
 }
 
 export function mount() {
-  onTabChange((tab) => tab === 'overview' && playOverview());
+  onTabChange((tab) => (tab === 'overview' ? playOverview() : motion.pauseCoin()));
+
+  byId('coinBtn').addEventListener('click', () => {
+    motion.tossCoin();
+    navigator.vibrate?.(12);
+  });
 }
 
 export function render({ transactions }) {
@@ -64,9 +69,9 @@ export function render({ transactions }) {
   byId('categoryBreakdown').innerHTML = breakdownHtml(breakdown, currency);
 
   const monthCount = transactions.filter((t) => t.date.startsWith(toMonthKey())).length;
-  byId('worldCaption').textContent = monthCount
+  byId('heroCaption').textContent = monthCount
     ? `${monthCount} expense${monthCount > 1 ? 's' : ''} across ${breakdown.length} categor${breakdown.length > 1 ? 'ies' : 'y'} this month`
-    : 'Your first expense of the month starts the journey';
+    : 'Tap the coin, then add your first expense';
 
   // Data changed while Overview is open: let the bars grow into their new widths.
   if (getActiveTab() === 'overview') motion.growWidth(byId('categoryBreakdown').querySelectorAll('[data-bar]'));

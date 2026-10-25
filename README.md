@@ -16,7 +16,7 @@ Vanilla HTML + ES modules + Tailwind CDN + Anime.js v4. **No build step**: it de
 | 💱 Currency | Toggle MYR (RM) / USD ($) |
 | 💾 Persistence | `localStorage`; corrupt data falls back safely; syncs across tabs |
 | 🎬 Motion | Anime.js: intro sequence, tab transitions, count-up totals, growing bars, row highlight/collapse, form shake, springy toast |
-| 🌍 World hero | Animated SVG on Overview: globe grid draws itself, route arc draws, plane flies the route on a loop |
+| 🪙 Coin hero | 3D money coin on Overview: tosses on a loop with a flip, shadow and sparkle burst; tap to flip; shows the active currency (RM / $) |
 | 📲 PWA | Installable (Android/desktop install button, iOS "Add to Home Screen" hint), works fully offline, in-app update banner |
 | 📤 Export | 1-tap CSV (Excel-friendly; cells that look like formulas are escaped) |
 

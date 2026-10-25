@@ -86,63 +86,54 @@
 
     <!-- ===== Tab: Overview ===== -->
     <section id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" data-title="Overview" class="tab-panel space-y-3" hidden>
-      <!-- World hero: animated by services/motion.js → playWorld() -->
-      <div class="relative overflow-hidden rounded-2xl border border-slate-800 bg-gradient-to-b from-sky-500/10 via-slate-900 to-slate-900 px-4 pt-3 pb-4">
-        <svg id="worldSvg" class="world block w-full h-auto" viewBox="0 0 320 170" role="img" aria-labelledby="worldTitle">
-          <title id="worldTitle">Globe with a plane flying between two cities</title>
-          <defs>
-            <radialGradient id="globeFill" cx="40%" cy="35%" r="70%">
-              <stop offset="0%" stop-color="#0ea5e9" stop-opacity=".35" />
-              <stop offset="100%" stop-color="#0f172a" stop-opacity=".9" />
-            </radialGradient>
-            <linearGradient id="routeStroke" x1="0" x2="1">
-              <stop offset="0%" stop-color="#34d399" />
-              <stop offset="100%" stop-color="#38bdf8" />
-            </linearGradient>
-          </defs>
-
-          <g data-world-globe>
-            <circle cx="160" cy="100" r="62" fill="url(#globeFill)" stroke="#334155" stroke-width="1.5" />
-            <g fill="none" stroke="#38bdf8" stroke-opacity=".35" stroke-width="1" stroke-linecap="round">
-              <!-- meridians -->
-              <path data-world-line d="M160 38 C 128 60, 128 140, 160 162" />
-              <path data-world-line d="M160 38 C 192 60, 192 140, 160 162" />
-              <path data-world-line d="M160 38 C 104 56, 104 144, 160 162" />
-              <path data-world-line d="M160 38 C 216 56, 216 144, 160 162" />
-              <path data-world-line d="M160 38 L 160 162" />
-              <!-- parallels -->
-              <path data-world-line d="M106 70 C 140 80, 180 80, 214 70" />
-              <path data-world-line d="M98 100 C 136 112, 184 112, 222 100" />
-              <path data-world-line d="M106 130 C 140 140, 180 140, 214 130" />
-            </g>
-            <!-- stylised land masses -->
-            <g fill="#34d399" fill-opacity=".28">
-              <path d="M128 72 c 8 -6 20 -4 24 4 c 3 7 -4 10 -2 17 c 2 6 -6 10 -12 6 c -6 -4 -14 -2 -16 -9 c -2 -7 0 -13 6 -18 z" />
-              <path d="M176 88 c 6 -4 16 -2 18 5 c 2 6 -3 9 -1 14 c 1 6 -7 9 -12 5 c -5 -3 -9 -6 -9 -12 c 0 -5 1 -9 4 -12 z" />
-              <path d="M150 124 c 5 -2 12 0 13 5 c 1 4 -3 7 -8 7 c -5 0 -8 -3 -8 -6 c 0 -3 1 -5 3 -6 z" />
-            </g>
-          </g>
-
-          <!-- flight route + cities -->
-          <path data-world-route d="M44 120 Q 160 -18 276 112" fill="none" stroke="url(#routeStroke)" stroke-width="2" stroke-linecap="round" />
-          <g transform="translate(44 120)">
-            <circle data-world-pulse r="6" fill="#34d399" />
-            <circle data-world-dot r="4.5" fill="#34d399" stroke="#020617" stroke-width="2" />
-          </g>
-          <g transform="translate(276 112)">
-            <circle data-world-pulse r="6" fill="#38bdf8" />
-            <circle data-world-dot r="4.5" fill="#38bdf8" stroke="#020617" stroke-width="2" />
-          </g>
-
-          <!-- plane: drawn around (0,0) pointing along +x so the motion path can rotate it -->
-          <g data-world-plane>
-            <path d="M10 0 L-7 -7 L-3 0 L-7 7 Z" fill="#f1f5f9" />
-            <path d="M-3 0 L-9 0" stroke="#f1f5f9" stroke-width="1.5" stroke-linecap="round" />
-          </g>
-        </svg>
-        <p class="text-center text-sm font-medium text-slate-200 -mt-1">Track every ringgit, wherever you fly</p>
-        <p id="worldCaption" class="text-center text-xs text-slate-500 mt-0.5"></p>
+      <!-- Coin hero: tap to flip; animated by services/motion.js → playCoin() -->
+      <div class="relative overflow-hidden rounded-2xl border border-slate-800 bg-gradient-to-b from-amber-500/10 via-slate-900 to-slate-900 px-4 pt-2 pb-4">
+        <div id="coinStage" class="coin-stage">
+          <span data-coin-sparkle class="coin-sparkle" style="left:calc(50% + -74px);top:62px"></span>
+          <span data-coin-sparkle class="coin-sparkle" style="left:calc(50% + -52px);top:24px"></span>
+          <span data-coin-sparkle class="coin-sparkle" style="left:calc(50% + 60px);top:30px"></span>
+          <span data-coin-sparkle class="coin-sparkle" style="left:calc(50% + 78px);top:70px"></span>
+          <span data-coin-sparkle class="coin-sparkle" style="left:calc(50% + -8px);top:8px"></span>
+          <button id="coinBtn" type="button" data-coin class="coin" aria-label="Flip the coin">
+            <span class="coin-face coin-front">
+              <svg viewBox="0 0 100 100" aria-hidden="true">
+                <defs>
+                  <radialGradient id="coinGoldFront" cx="35%" cy="30%" r="75%">
+                    <stop offset="0%" stop-color="#fef3c7" />
+                    <stop offset="45%" stop-color="#fbbf24" />
+                    <stop offset="100%" stop-color="#b45309" />
+                  </radialGradient>
+                </defs>
+                <circle cx="50" cy="50" r="48" fill="url(#coinGoldFront)" />
+                <circle cx="50" cy="50" r="45" fill="none" stroke="#92400e" stroke-opacity=".55" stroke-width="2.5" stroke-dasharray="1.6 2.4" />
+                <circle cx="50" cy="50" r="37" fill="none" stroke="#fef3c7" stroke-opacity=".7" stroke-width="1.5" />
+                <text data-currency-symbol x="50" y="51" text-anchor="middle" dominant-baseline="central" font-family="ui-sans-serif, system-ui, sans-serif" font-size="30" font-weight="800" fill="#78350f">RM</text>
+                <ellipse cx="36" cy="28" rx="16" ry="8" fill="#fff" fill-opacity=".35" transform="rotate(-30 36 28)" />
+              </svg>
+            </span>
+            <span class="coin-face coin-back">
+              <svg viewBox="0 0 100 100" aria-hidden="true">
+                <defs>
+                  <radialGradient id="coinGoldBack" cx="35%" cy="30%" r="75%">
+                    <stop offset="0%" stop-color="#fef3c7" />
+                    <stop offset="45%" stop-color="#fbbf24" />
+                    <stop offset="100%" stop-color="#b45309" />
+                  </radialGradient>
+                </defs>
+                <circle cx="50" cy="50" r="48" fill="url(#coinGoldBack)" />
+                <circle cx="50" cy="50" r="45" fill="none" stroke="#92400e" stroke-opacity=".55" stroke-width="2.5" stroke-dasharray="1.6 2.4" />
+                <circle cx="50" cy="50" r="37" fill="none" stroke="#fef3c7" stroke-opacity=".7" stroke-width="1.5" />
+                <g transform="translate(32 32) scale(1.5)" fill="none" stroke="#78350f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1" /><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4" /></g>
+                <ellipse cx="36" cy="28" rx="16" ry="8" fill="#fff" fill-opacity=".35" transform="rotate(-30 36 28)" />
+              </svg>
+            </span>
+          </button>
+          <span data-coin-shadow class="coin-shadow" aria-hidden="true"></span>
+        </div>
+        <p class="text-center text-sm font-medium text-slate-200">Every coin counts</p>
+        <p id="heroCaption" class="text-center text-xs text-slate-500 mt-0.5"></p>
       </div>
+
       <div class="grid grid-cols-2 gap-3">
         <div class="rounded-2xl border border-slate-800 bg-gradient-to-br from-emerald-500/15 to-slate-900 p-4">
           <div class="flex items-center gap-1.5 text-xs text-slate-400"><i data-lucide="sun" class="h-3.5 w-3.5"></i>Spent Today</div>

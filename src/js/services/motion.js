@@ -144,52 +144,44 @@ export function countTo(el, value, format) {
   });
 }
 
-// ---------- SVG ----------
+// ---------- Coin hero ----------
+
+let coinTimeline = null;
 
 /**
- * World illustration: graticule lines draw themselves, the route arc draws,
- * then the plane flies the route on a loop and the destination pins pulse.
+ * Money coin toss on a loop: the coin flies up while spinning five full turns (so it
+ * always lands face up), the shadow shrinks and grows with the height, then sparkles burst.
  */
-export function playWorld(svg) {
-  if (!svg) return;
-  if (!isEnabled()) {
-    svg.classList.add('is-static');
-    return;
-  }
-  svg.classList.remove('is-static');
+export function playCoin(stage) {
+  if (!stage) return;
+  coinTimeline?.revert(); // reopening the tab restarts cleanly instead of stacking loops
+  coinTimeline = null;
+  if (!isEnabled()) return;
 
-  const { animate, createDrawable, createMotionPath, remove, stagger } = anime;
-  const globe = svg.querySelector('[data-world-globe]');
-  const lines = svg.querySelectorAll('[data-world-line]');
-  const route = svg.querySelector('[data-world-route]');
-  const plane = svg.querySelector('[data-world-plane]');
-  const pins = svg.querySelectorAll('[data-world-dot]');
-  const pulses = svg.querySelectorAll('[data-world-pulse]');
+  const coin = stage.querySelector('[data-coin]');
+  const shadow = stage.querySelector('[data-coin-shadow]');
+  const sparkles = stage.querySelectorAll('[data-coin-sparkle]');
+  const air = 460;
+  const fall = 420;
+  const land = air + fall;
 
-  // Replaying (e.g. reopening the tab) must cancel the previous infinite loops first.
-  remove([globe, ...lines, route, plane, ...pins, ...pulses]);
+  coinTimeline = anime
+    .createTimeline({ loop: true, loopDelay: 2200 })
+    .add(coin, { translateY: [0, -78], duration: air, ease: 'outQuad' }, 0)
+    .add(coin, { translateY: [-78, 0], duration: fall, ease: 'inQuad' }, air)
+    .add(coin, { rotateY: [0, 1800], duration: land, ease: 'outSine' }, 0)
+    .add(coin, { translateY: [0, -12, 0], duration: 320, ease: 'outQuad' }, land)
+    .add(shadow, { scaleX: [1, 0.45], opacity: [0.9, 0.3], duration: air, ease: 'outQuad' }, 0)
+    .add(shadow, { scaleX: [0.45, 1], opacity: [0.3, 0.9], duration: fall, ease: 'inQuad' }, air)
+    .add(sparkles, { scale: [0, 1.2, 0], opacity: [0, 1, 0], rotate: [0, 90], duration: 650, delay: anime.stagger(45), ease: 'outQuad' }, land - 40);
+}
 
-  animate(globe, { scale: { from: 0.85 }, opacity: { from: 0 }, duration: 700, ease: 'outExpo' });
-  animate(createDrawable(lines), { draw: ['0 0', '0 1'], duration: 1200, delay: stagger(70, { start: 150 }), ease: 'inOutQuad' });
-  animate(pins, { scale: { from: 0 }, duration: 500, delay: stagger(120, { start: 700 }), ease: 'outBack' });
-  animate(createDrawable(route), { draw: ['0 0', '0 1'], duration: 1100, delay: 900, ease: 'inOutSine' });
+/** Tap to flip: restart the toss from the ground. */
+export function tossCoin() {
+  coinTimeline?.restart();
+}
 
-  animate(plane, {
-    ...createMotionPath(route),
-    opacity: { from: 0, to: 1, duration: 300 },
-    duration: 3600,
-    delay: 1600,
-    loop: true,
-    loopDelay: 600,
-    ease: 'inOutSine',
-  });
-
-  animate(pulses, {
-    scale: [1, 2.6],
-    opacity: [0.7, 0],
-    duration: 1600,
-    delay: stagger(400, { start: 1200 }),
-    loop: true,
-    ease: 'outQuad',
-  });
+/** Stop the loop while the Overview tab is hidden. */
+export function pauseCoin() {
+  coinTimeline?.pause();
 }
