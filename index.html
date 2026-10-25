@@ -6,21 +6,20 @@
   <meta name="theme-color" content="#020617" />
   <meta name="description" content="Daily Budget & Expense Tracker — quick on-the-go expense entry with daily budget tracking." />
   <title>Daily Budget Tracker</title>
+
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <style>
-    html, body { -webkit-tap-highlight-color: transparent; }
-    input[type="number"]::-webkit-inner-spin-button,
-    input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-    input[type="number"] { -moz-appearance: textfield; }
-    .toast-enter { animation: toastIn .2s ease-out; }
-    @keyframes toastIn { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
-  </style>
+  <link rel="stylesheet" href="src/styles/main.css" />
+  <script type="module" src="src/js/main.js"></script>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen antialiased">
+  <noscript>
+    <p class="p-4 text-center text-rose-400">This app needs JavaScript enabled.</p>
+  </noscript>
+
   <div class="max-w-xl mx-auto px-4 pb-24 pt-[max(1rem,env(safe-area-inset-top))]">
 
-    <!-- Header -->
+    <!-- ===== Header ===== -->
     <header class="flex items-center justify-between gap-2 py-3">
       <div class="flex items-center gap-2 min-w-0">
         <div class="h-10 w-10 shrink-0 rounded-xl bg-emerald-500/15 text-emerald-400 grid place-items-center">
@@ -43,7 +42,7 @@
       </div>
     </header>
 
-    <!-- Summary cards -->
+    <!-- ===== Summary cards ===== -->
     <section class="grid grid-cols-2 gap-3 mt-2" aria-label="Summary">
       <div class="rounded-2xl border border-slate-800 bg-gradient-to-br from-emerald-500/15 to-slate-900 p-4">
         <div class="flex items-center gap-1.5 text-xs text-slate-400"><i data-lucide="sun" class="h-3.5 w-3.5"></i>Spent Today</div>
@@ -57,7 +56,7 @@
       </div>
     </section>
 
-    <!-- Budget -->
+    <!-- ===== Daily budget ===== -->
     <section class="mt-3 rounded-2xl border border-slate-800 bg-slate-900 p-4" aria-label="Daily budget">
       <div class="flex items-center justify-between gap-2">
         <div class="flex items-center gap-1.5 text-sm font-medium"><i data-lucide="target" class="h-4 w-4 text-slate-400"></i>Daily Budget Target</div>
@@ -75,7 +74,7 @@
       <div id="budgetBody" class="mt-2"></div>
     </section>
 
-    <!-- Entry form -->
+    <!-- ===== Expense entry ===== -->
     <section class="mt-3 rounded-2xl border border-slate-800 bg-slate-900 p-4" aria-label="Add expense">
       <h2 class="flex items-center gap-1.5 text-sm font-medium mb-3"><i data-lucide="plus-circle" class="h-4 w-4 text-emerald-400"></i>Quick Add</h2>
       <form id="expenseForm" class="space-y-3" autocomplete="off" novalidate>
@@ -86,7 +85,7 @@
         </div>
         <div class="grid grid-cols-5 gap-2">
           <div class="col-span-3">
-            <label for="itemPrice" class="block text-xs text-slate-400 mb-1">Price (<span class="curLabel">MYR</span>)</label>
+            <label for="itemPrice" class="block text-xs text-slate-400 mb-1">Price (<span data-currency-label>MYR</span>)</label>
             <input id="itemPrice" type="number" inputmode="decimal" enterkeyhint="next" step="0.01" min="0" placeholder="0.00" required
               class="w-full min-h-[44px] rounded-xl bg-slate-950 border border-slate-800 px-3 text-base tabular-nums placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
           </div>
@@ -97,7 +96,7 @@
           </div>
         </div>
         <div>
-          <span class="block text-xs text-slate-400 mb-1" id="catLabel">Category</span>
+          <span id="catLabel" class="block text-xs text-slate-400 mb-1">Category</span>
           <div id="categoryPicker" role="radiogroup" aria-labelledby="catLabel" class="grid grid-cols-3 gap-2"></div>
         </div>
         <div class="flex items-center justify-between rounded-xl bg-slate-950 border border-slate-800 px-3 py-2">
@@ -112,7 +111,7 @@
       </form>
     </section>
 
-    <!-- Transactions -->
+    <!-- ===== Transactions ===== -->
     <section class="mt-5" aria-label="Recent transactions">
       <div class="flex items-center justify-between mb-2">
         <h2 class="flex items-center gap-1.5 text-sm font-medium"><i data-lucide="receipt" class="h-4 w-4 text-slate-400"></i>Recent Transactions</h2>
@@ -138,424 +137,7 @@
     </footer>
   </div>
 
-  <div id="toast" class="hidden fixed left-1/2 -translate-x-1/2 bottom-[max(1.25rem,env(safe-area-inset-bottom))] z-50 rounded-xl bg-slate-100 text-slate-950 text-sm font-medium px-4 py-3 shadow-lg"></div>
-
-  <script>
-  (() => {
-    'use strict';
-
-    // ---------- Config ----------
-    const STORAGE = { tx: 'dbt.transactions.v1', settings: 'dbt.settings.v1' };
-    const CURRENCIES = [
-      { code: 'MYR', symbol: 'RM' },
-      { code: 'USD', symbol: '$' },
-    ];
-    const CATEGORIES = [
-      { id: 'food',      label: 'Food & Drink', icon: 'utensils',      badge: 'bg-orange-500/15 text-orange-300 border-orange-500/30' },
-      { id: 'transport', label: 'Transport',    icon: 'car',           badge: 'bg-sky-500/15 text-sky-300 border-sky-500/30' },
-      { id: 'groceries', label: 'Groceries',    icon: 'shopping-basket', badge: 'bg-lime-500/15 text-lime-300 border-lime-500/30' },
-      { id: 'shopping',  label: 'Shopping',     icon: 'shopping-bag',  badge: 'bg-fuchsia-500/15 text-fuchsia-300 border-fuchsia-500/30' },
-      { id: 'bills',     label: 'Bills',        icon: 'file-text',     badge: 'bg-violet-500/15 text-violet-300 border-violet-500/30' },
-      { id: 'other',     label: 'Other',        icon: 'tag',           badge: 'bg-slate-500/15 text-slate-300 border-slate-500/30' },
-    ];
-    const CAT_MAP = Object.fromEntries(CATEGORIES.map(c => [c.id, c]));
-
-    // ---------- Safe storage ----------
-    const storage = {
-      read(key, fallback) {
-        try {
-          const raw = localStorage.getItem(key);
-          if (raw == null) return fallback;
-          const parsed = JSON.parse(raw);
-          return parsed ?? fallback;
-        } catch (err) {
-          console.warn('[storage] read failed for', key, err);
-          return fallback;
-        }
-      },
-      write(key, value) {
-        try {
-          localStorage.setItem(key, JSON.stringify(value));
-          return true;
-        } catch (err) {
-          console.warn('[storage] write failed for', key, err);
-          toast('Could not save — storage full or blocked. Export CSV now.');
-          return false;
-        }
-      },
-    };
-
-    // ---------- Helpers ----------
-    const $ = (id) => document.getElementById(id);
-    const round2 = (n) => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
-    const pad = (n) => String(n).padStart(2, '0');
-    const dateKey = (d = new Date()) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-    const monthKey = (d = new Date()) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}`;
-    const escapeHtml = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-    const uid = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
-    const numFmt = new Intl.NumberFormat('en-MY', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-    const currency = () => CURRENCIES.find(c => c.code === state.settings.currency) || CURRENCIES[0];
-    const money = (n) => `${currency().symbol} ${numFmt.format(round2(n))}`;
-
-    function sanitizeTx(t) {
-      if (!t || typeof t !== 'object') return null;
-      const price = Number(t.price), qty = Number(t.qty);
-      if (!Number.isFinite(price) || !Number.isFinite(qty)) return null;
-      const ts = typeof t.ts === 'number' ? t.ts : Date.parse(t.ts);
-      if (!Number.isFinite(ts)) return null;
-      return {
-        id: String(t.id || uid()),
-        name: String(t.name || 'Untitled').slice(0, 80),
-        price: round2(price),
-        qty,
-        total: round2(price * qty),
-        category: CAT_MAP[t.category] ? t.category : 'other',
-        ts,
-        date: typeof t.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(t.date) ? t.date : dateKey(new Date(ts)),
-      };
-    }
-
-    // ---------- State ----------
-    const rawTx = storage.read(STORAGE.tx, []);
-    const rawSettings = storage.read(STORAGE.settings, {});
-    const state = {
-      tx: (Array.isArray(rawTx) ? rawTx : []).map(sanitizeTx).filter(Boolean),
-      settings: {
-        currency: CURRENCIES.some(c => c.code === rawSettings?.currency) ? rawSettings.currency : 'MYR',
-        dailyBudget: Number.isFinite(Number(rawSettings?.dailyBudget)) && Number(rawSettings.dailyBudget) > 0 ? round2(rawSettings.dailyBudget) : 0,
-      },
-      selectedCategory: 'food',
-      search: '',
-      filterCategory: 'all',
-    };
-    const saveTx = () => storage.write(STORAGE.tx, state.tx);
-    const saveSettings = () => storage.write(STORAGE.settings, state.settings);
-
-    // ---------- UI: toast ----------
-    let toastTimer;
-    function toast(msg) {
-      const el = $('toast');
-      el.textContent = msg;
-      el.classList.remove('hidden');
-      el.classList.remove('toast-enter'); void el.offsetWidth; el.classList.add('toast-enter');
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => el.classList.add('hidden'), 2200);
-    }
-
-    const refreshIcons = () => { if (window.lucide) lucide.createIcons(); };
-
-    // ---------- Render: static bits ----------
-    function renderCategoryPicker() {
-      $('categoryPicker').innerHTML = CATEGORIES.map(c => {
-        const active = c.id === state.selectedCategory;
-        return `<button type="button" role="radio" aria-checked="${active}" data-cat="${c.id}"
-          class="min-h-[44px] rounded-xl border px-2 py-2 text-xs font-medium flex flex-col items-center justify-center gap-1 transition active:scale-95
-          ${active ? 'border-emerald-500 bg-emerald-500/15 text-emerald-300' : 'border-slate-800 bg-slate-950 text-slate-400 hover:text-slate-200'}">
-          <i data-lucide="${c.icon}" class="h-4 w-4"></i><span class="leading-tight text-center">${c.label}</span></button>`;
-      }).join('');
-    }
-
-    function renderCategoryFilter() {
-      $('categoryFilter').innerHTML = `<option value="all">All</option>` +
-        CATEGORIES.map(c => `<option value="${c.id}">${c.label}</option>`).join('');
-      $('categoryFilter').value = state.filterCategory;
-    }
-
-    function renderCurrency() {
-      $('currencyBtn').textContent = currency().code;
-      document.querySelectorAll('.curLabel').forEach(el => el.textContent = currency().code);
-    }
-
-    // ---------- Render: dashboard ----------
-    function renderSummary() {
-      const now = new Date();
-      const today = dateKey(now), month = monthKey(now);
-      const todayTx = state.tx.filter(t => t.date === today);
-      const todaySum = round2(todayTx.reduce((s, t) => s + t.total, 0));
-      const monthSum = round2(state.tx.filter(t => t.date.startsWith(month)).reduce((s, t) => s + t.total, 0));
-
-      $('todayLabel').textContent = now.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
-      $('todayTotal').textContent = money(todaySum);
-      $('todayCount').textContent = todayTx.length === 0 ? 'No expenses recorded today' : `${todayTx.length} item${todayTx.length > 1 ? 's' : ''}`;
-      $('monthTotal').textContent = money(monthSum);
-      $('monthAvg').textContent = `avg ${money(monthSum / now.getDate())} / day`;
-
-      // Budget
-      const budget = state.settings.dailyBudget;
-      const body = $('budgetBody');
-      if (!budget) {
-        body.innerHTML = `<p class="text-sm text-slate-500">No target set. Tap <span class="text-slate-300">✎</span> to set a daily limit.</p>`;
-        return;
-      }
-      const pct = (todaySum / budget) * 100;
-      const color = pct > 100 ? 'bg-rose-500' : pct >= 80 ? 'bg-amber-400' : 'bg-emerald-500';
-      const text  = pct > 100 ? 'text-rose-400' : pct >= 80 ? 'text-amber-300' : 'text-emerald-400';
-      const remaining = round2(budget - todaySum);
-      body.innerHTML = `
-        <div class="flex items-baseline justify-between text-sm">
-          <span class="tabular-nums"><span class="font-semibold">${money(todaySum)}</span> <span class="text-slate-500">/ ${money(budget)}</span></span>
-          <span class="font-semibold tabular-nums ${text}">${Math.round(pct)}%</span>
-        </div>
-        <div class="mt-2 h-3 w-full rounded-full bg-slate-800 overflow-hidden" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.min(100, Math.round(pct))}" aria-label="Daily budget used">
-          <div class="h-full ${color} rounded-full transition-all duration-500" style="width:${Math.min(100, pct).toFixed(1)}%"></div>
-        </div>
-        <p class="mt-2 text-xs ${remaining < 0 ? 'text-rose-400' : 'text-slate-400'}">
-          ${remaining < 0 ? `Over budget by ${money(-remaining)}` : `${money(remaining)} left today`}
-        </p>`;
-    }
-
-    // ---------- Render: list ----------
-    function dayHeading(key) {
-      const today = dateKey();
-      const y = new Date(); y.setDate(y.getDate() - 1);
-      if (key === today) return 'Today';
-      if (key === dateKey(y)) return 'Yesterday';
-      const [yy, mm, dd] = key.split('-').map(Number);
-      return new Date(yy, mm - 1, dd).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
-    }
-
-    function renderList() {
-      const q = state.search.trim().toLowerCase();
-      const items = state.tx
-        .filter(t => state.filterCategory === 'all' || t.category === state.filterCategory)
-        .filter(t => !q || t.name.toLowerCase().includes(q) || CAT_MAP[t.category].label.toLowerCase().includes(q))
-        .sort((a, b) => b.ts - a.ts);
-
-      const list = $('txList');
-      $('resultCount').textContent = state.tx.length ? `${items.length} of ${state.tx.length}` : '';
-
-      if (items.length === 0) {
-        const filtered = q || state.filterCategory !== 'all';
-        list.innerHTML = `
-          <div class="rounded-2xl border border-dashed border-slate-800 p-8 text-center">
-            <div class="mx-auto h-12 w-12 rounded-full bg-slate-900 grid place-items-center text-slate-500">
-              <i data-lucide="${filtered ? 'search-x' : 'inbox'}" class="h-6 w-6"></i>
-            </div>
-            <p class="mt-3 text-sm font-medium text-slate-300">${filtered ? 'No matching expenses' : 'No expenses recorded yet'}</p>
-            <p class="mt-1 text-xs text-slate-500">${filtered ? 'Try a different search or category.' : 'Add your first expense above to get started.'}</p>
-          </div>`;
-        refreshIcons();
-        return;
-      }
-
-      const groups = new Map();
-      for (const t of items) {
-        if (!groups.has(t.date)) groups.set(t.date, []);
-        groups.get(t.date).push(t);
-      }
-
-      list.innerHTML = [...groups.entries()].map(([day, txs]) => {
-        const dayTotal = round2(txs.reduce((s, t) => s + t.total, 0));
-        return `
-          <div>
-            <div class="flex items-center justify-between px-1 mb-1.5">
-              <h3 class="text-xs font-semibold uppercase tracking-wide text-slate-400">${escapeHtml(dayHeading(day))}</h3>
-              <span class="text-xs font-semibold tabular-nums text-slate-300">${money(dayTotal)}</span>
-            </div>
-            <ul class="rounded-2xl border border-slate-800 bg-slate-900 divide-y divide-slate-800 overflow-hidden">
-              ${txs.map(rowHtml).join('')}
-            </ul>
-          </div>`;
-      }).join('');
-      refreshIcons();
-    }
-
-    function rowHtml(t) {
-      const c = CAT_MAP[t.category];
-      const time = new Date(t.ts).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
-      const qtyText = t.qty !== 1 ? `${money(t.price)} × ${+t.qty.toFixed(3)}` : '';
-      return `
-        <li class="flex items-center gap-3 pl-3 pr-1 py-2">
-          <div class="h-9 w-9 shrink-0 rounded-xl grid place-items-center border ${c.badge}"><i data-lucide="${c.icon}" class="h-4 w-4"></i></div>
-          <div class="min-w-0 flex-1">
-            <p class="text-sm font-medium truncate">${escapeHtml(t.name)}</p>
-            <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
-              <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-md border ${c.badge}">${c.label}</span>
-              <span class="text-[11px] text-slate-500">${time}</span>
-              ${qtyText ? `<span class="text-[11px] text-slate-500 tabular-nums">· ${qtyText}</span>` : ''}
-            </div>
-          </div>
-          <span class="text-sm font-semibold tabular-nums whitespace-nowrap">${money(t.total)}</span>
-          <button type="button" data-delete="${escapeHtml(t.id)}" aria-label="Delete ${escapeHtml(t.name)}"
-            class="min-h-[44px] min-w-[44px] rounded-xl grid place-items-center text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 active:scale-90 transition">
-            <i data-lucide="trash-2" class="h-4 w-4"></i>
-          </button>
-        </li>`;
-    }
-
-    function renderAll() {
-      renderCurrency();
-      renderSummary();
-      renderList();
-      refreshIcons();
-    }
-
-    // ---------- Entry form ----------
-    const nameEl = $('itemName'), priceEl = $('itemPrice'), qtyEl = $('itemQty');
-
-    function parsedQty() {
-      const raw = qtyEl.value.trim();
-      if (raw === '') return 1;
-      const q = Number(raw);
-      return Number.isFinite(q) ? q : NaN;
-    }
-
-    function updatePreview() {
-      const p = Number(priceEl.value), q = parsedQty();
-      const total = Number.isFinite(p) && Number.isFinite(q) ? round2(p * q) : 0;
-      $('previewTotal').textContent = money(total);
-    }
-
-    function showError(msg, focusEl) {
-      const e = $('formError');
-      e.textContent = msg;
-      e.classList.toggle('hidden', !msg);
-      if (focusEl) focusEl.focus();
-    }
-
-    function addExpense() {
-      const name = nameEl.value.trim();
-      const price = Number(priceEl.value);
-      const qty = parsedQty();
-
-      if (!name) return showError('Please enter an item name.', nameEl);
-      if (priceEl.value.trim() === '' || !Number.isFinite(price) || price < 0) return showError('Please enter a valid price.', priceEl);
-      if (!Number.isFinite(qty) || qty <= 0) return showError('Quantity must be greater than 0.', qtyEl);
-      showError('');
-
-      const now = new Date();
-      const tx = sanitizeTx({ id: uid(), name, price, qty, category: state.selectedCategory, ts: now.getTime(), date: dateKey(now) });
-      state.tx.push(tx);
-      saveTx();
-
-      nameEl.value = ''; priceEl.value = ''; qtyEl.value = '';
-      updatePreview();
-      renderAll();
-      nameEl.focus();
-      toast(`Added ${tx.name} · ${money(tx.total)}`);
-    }
-
-    $('expenseForm').addEventListener('submit', (e) => { e.preventDefault(); addExpense(); });
-
-    // Enter on name/price moves to next field; Enter on qty (or anywhere with valid data) submits
-    [nameEl, priceEl].forEach((el, i, arr) => {
-      el.addEventListener('keydown', (e) => {
-        if (e.key !== 'Enter') return;
-        e.preventDefault();
-        if (nameEl.value.trim() && priceEl.value.trim()) return addExpense();
-        (i === 0 ? priceEl : qtyEl).focus();
-      });
-    });
-    qtyEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addExpense(); } });
-    [priceEl, qtyEl].forEach(el => el.addEventListener('input', updatePreview));
-
-    $('categoryPicker').addEventListener('click', (e) => {
-      const btn = e.target.closest('[data-cat]');
-      if (!btn) return;
-      state.selectedCategory = btn.dataset.cat;
-      renderCategoryPicker();
-      refreshIcons();
-    });
-
-    // ---------- List interactions ----------
-    $('txList').addEventListener('click', (e) => {
-      const btn = e.target.closest('[data-delete]');
-      if (!btn) return;
-      const id = btn.dataset.delete;
-      const idx = state.tx.findIndex(t => t.id === id);
-      if (idx === -1) return;
-      const [removed] = state.tx.splice(idx, 1);
-      saveTx();
-      renderAll();
-      toast(`Deleted ${removed.name}`);
-    });
-
-    let searchTimer;
-    $('searchInput').addEventListener('input', (e) => {
-      clearTimeout(searchTimer);
-      searchTimer = setTimeout(() => { state.search = e.target.value; renderList(); }, 120);
-    });
-    $('categoryFilter').addEventListener('change', (e) => { state.filterCategory = e.target.value; renderList(); });
-
-    // ---------- Budget ----------
-    $('editBudgetBtn').addEventListener('click', () => {
-      const form = $('budgetForm');
-      const opening = form.classList.contains('hidden');
-      form.classList.toggle('hidden');
-      if (opening) {
-        $('budgetInput').value = state.settings.dailyBudget || '';
-        $('budgetInput').focus();
-      }
-    });
-    $('budgetForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const v = Number($('budgetInput').value);
-      state.settings.dailyBudget = Number.isFinite(v) && v > 0 ? round2(v) : 0;
-      saveSettings();
-      $('budgetForm').classList.add('hidden');
-      renderSummary();
-      toast(state.settings.dailyBudget ? `Daily budget set to ${money(state.settings.dailyBudget)}` : 'Daily budget cleared');
-    });
-
-    // ---------- Currency ----------
-    $('currencyBtn').addEventListener('click', () => {
-      const i = CURRENCIES.findIndex(c => c.code === state.settings.currency);
-      state.settings.currency = CURRENCIES[(i + 1) % CURRENCIES.length].code;
-      saveSettings();
-      updatePreview();
-      renderAll();
-    });
-
-    // ---------- CSV export ----------
-    function csvCell(v) {
-      let s = String(v ?? '');
-      if (/^[=+\-@\t\r]/.test(s)) s = "'" + s; // guard against spreadsheet formula injection
-      return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-    }
-
-    $('exportBtn').addEventListener('click', () => {
-      if (state.tx.length === 0) return toast('Nothing to export yet');
-      const header = ['Date', 'Time', 'Item', 'Category', 'Unit Price', 'Quantity', 'Total', 'Currency'];
-      const rows = [...state.tx].sort((a, b) => a.ts - b.ts).map(t => {
-        const d = new Date(t.ts);
-        return [t.date, `${pad(d.getHours())}:${pad(d.getMinutes())}`, t.name, CAT_MAP[t.category].label,
-          t.price.toFixed(2), t.qty, t.total.toFixed(2), currency().code];
-      });
-      const csv = '﻿' + [header, ...rows].map(r => r.map(csvCell).join(',')).join('\r\n');
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `expenses-${dateKey()}.csv`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-      toast(`Exported ${state.tx.length} transactions`);
-    });
-
-    // ---------- Cross-tab sync & day rollover ----------
-    window.addEventListener('storage', (e) => {
-      if (e.key === STORAGE.tx) {
-        const next = storage.read(STORAGE.tx, []);
-        state.tx = (Array.isArray(next) ? next : []).map(sanitizeTx).filter(Boolean);
-        renderAll();
-      } else if (e.key === STORAGE.settings) {
-        Object.assign(state.settings, storage.read(STORAGE.settings, {}));
-        renderAll();
-      }
-    });
-    let lastDay = dateKey();
-    setInterval(() => { if (dateKey() !== lastDay) { lastDay = dateKey(); renderAll(); } }, 60 * 1000);
-    document.addEventListener('visibilitychange', () => { if (!document.hidden && dateKey() !== lastDay) { lastDay = dateKey(); renderAll(); } });
-
-    // ---------- Init ----------
-    renderCategoryPicker();
-    renderCategoryFilter();
-    updatePreview();
-    renderAll();
-  })();
-  </script>
+  <div id="toast" role="status" aria-live="polite"
+    class="hidden fixed left-1/2 -translate-x-1/2 bottom-[max(1.25rem,env(safe-area-inset-bottom))] z-50 rounded-xl bg-slate-100 text-slate-950 text-sm font-medium px-4 py-3 shadow-lg"></div>
 </body>
 </html>

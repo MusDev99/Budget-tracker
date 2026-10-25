@@ -1,0 +1,50 @@
+/*
+ * Custom styles that Tailwind utilities don't cover.
+ * Layout and theming live in the markup as Tailwind classes.
+ */
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Hide native number spinners — the mobile keypad is the input method. */
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* ---------- Toast ---------- */
+.toast-enter {
+  animation: toast-in 0.2s ease-out;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
