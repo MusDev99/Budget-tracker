@@ -2,6 +2,7 @@ import { CATEGORIES, DEFAULT_CATEGORY } from '../config/constants.js';
 import { addTransaction, getCurrency } from '../core/store.js';
 import { byId, refreshIcons } from '../utils/dom.js';
 import { formatMoney, round2 } from '../utils/number.js';
+import { onTabChange } from './tabs.js';
 import { showToast } from './toast.js';
 
 let selectedCategory = DEFAULT_CATEGORY;
@@ -103,6 +104,12 @@ export function mount() {
     if (!button) return;
     selectedCategory = button.dataset.cat;
     renderCategoryPicker();
+  });
+
+  // Opening the Add tab by tap jumps straight into typing. Keyboard tab navigation keeps
+  // focus on the tab bar, and the initial page load doesn't pop the mobile keyboard.
+  onTabChange((tab, { previous, viaKeyboard }) => {
+    if (tab === 'add' && previous && !viaKeyboard) els.name.focus();
   });
 
   renderCategoryPicker();

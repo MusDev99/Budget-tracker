@@ -17,6 +17,19 @@ export function selectMonthStats(transactions, now = new Date()) {
   return { total, dailyAverage: round2(total / now.getDate()) };
 }
 
+/** Month spend per category, largest first; categories with no spend are omitted. */
+export function selectCategoryBreakdown(transactions, now = new Date()) {
+  const key = toMonthKey(now);
+  const totals = new Map();
+  for (const t of transactions) {
+    if (t.date.startsWith(key)) totals.set(t.category, (totals.get(t.category) ?? 0) + t.total);
+  }
+  const grand = [...totals.values()].reduce((a, b) => a + b, 0);
+  return [...totals]
+    .map(([category, total]) => ({ category, total: round2(total), percent: grand ? (total / grand) * 100 : 0 }))
+    .sort((a, b) => b.total - a.total);
+}
+
 /** @returns {'ok' | 'warning' | 'over'} */
 export function selectBudgetStatus(spent, budget) {
   const percent = budget > 0 ? (spent / budget) * 100 : 0;

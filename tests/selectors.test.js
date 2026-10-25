@@ -1,7 +1,14 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { filterTransactions, groupByDay, selectBudgetStatus, selectMonthStats, selectTodayStats } from '../src/js/core/selectors.js';
+import {
+  filterTransactions,
+  groupByDay,
+  selectBudgetStatus,
+  selectCategoryBreakdown,
+  selectMonthStats,
+  selectTodayStats,
+} from '../src/js/core/selectors.js';
 
 const now = new Date(2026, 9, 25, 12, 0); // 25 Oct 2026
 const tx = (id, date, total, extra = {}) => ({ id, name: id, price: total, qty: 1, total, category: 'food', ts: Date.parse(date), date, ...extra });
@@ -38,4 +45,11 @@ test('filterTransactions matches name or category label, newest first', () => {
 test('groupByDay keeps order and totals each day', () => {
   const groups = groupByDay(filterTransactions(data));
   assert.deepEqual(groups.map((g) => [g.date, g.total]), [['2026-10-25', 14.75], ['2026-10-01', 20], ['2026-09-30', 99]]);
+});
+
+test('selectCategoryBreakdown: current month only, largest first, percent of total', () => {
+  const result = selectCategoryBreakdown(data, now);
+  assert.deepEqual(result.map((r) => [r.category, r.total]), [['food', 30.5], ['transport', 4.25]]);
+  assert.equal(Math.round(result[0].percent + result[1].percent), 100);
+  assert.deepEqual(selectCategoryBreakdown([], now), []);
 });

@@ -24,6 +24,62 @@ input[type='number'] {
   appearance: textfield;
 }
 
+/* ---------- Bottom tab bar ---------- */
+.tab-btn {
+  min-height: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #64748b; /* slate-500 */
+  position: relative;
+  transition: color 0.15s ease;
+}
+
+.tab-btn:hover {
+  color: #cbd5e1; /* slate-300 */
+}
+
+.tab-btn[aria-selected='true'] {
+  color: #34d399; /* emerald-400 */
+}
+
+/* Active indicator pill above the icon */
+.tab-btn[aria-selected='true']::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  width: 32px;
+  height: 3px;
+  border-radius: 0 0 3px 3px;
+  background: currentColor;
+}
+
+.tab-btn:focus-visible {
+  outline: 2px solid #34d399;
+  outline-offset: -4px;
+  border-radius: 12px;
+}
+
+/* ---------- Tab panels ---------- */
+.tab-panel:not([hidden]) {
+  animation: panel-in 0.18s ease-out;
+}
+
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 /* ---------- Toast ---------- */
 .toast-enter {
   animation: toast-in 0.2s ease-out;

@@ -7,9 +7,11 @@ Vanilla HTML + ES modules + Tailwind CDN. **No build step**: it deploys straight
 
 | Feature | Details |
 |---|---|
+| 📑 Tab view | Bottom tab bar: Overview · Add · Budget · History. Deep links (`#history`), arrow-key navigation, opens on **Add** |
 | ➕ Quick add | Item, price, optional quantity (1 if empty), category. Live `Total = Price × Qty`. Enter submits |
-| 📊 Dashboard | Spent Today, This Month and the month's daily average |
-| 🎯 Daily budget | Progress bar: 🟢 < 80% · 🟡 80–100% · 🔴 > 100% |
+| 📊 Overview | Spent Today, This Month, daily average and a per-category breakdown for the month |
+| 🎯 Daily budget | Progress bar: 🟢 < 80% · 🟡 80–100% · 🔴 > 100%, plus one-tap presets |
+| 📌 Spent-today strip | Shown on every tab with a budget status dot; History tab badge counts today's items |
 | 🧾 History | Grouped by day, category badges, search + category filter, 1-tap delete |
 | 💱 Currency | Toggle MYR (RM) / USD ($) |
 | 💾 Persistence | `localStorage`; corrupt data falls back safely; syncs across tabs |
@@ -34,6 +36,7 @@ budget-tracker/
 │       │   ├── storage.js      # Safe localStorage read/write
 │       │   └── export.js       # CSV build + browser download
 │       ├── components/         # UI modules, each exposes mount() + render(state)
+│       │   ├── tabs.js         # Bottom tab bar + #hash routing (ARIA tabs pattern)
 │       │   ├── header.js
 │       │   ├── summary-cards.js
 │       │   ├── budget-card.js
