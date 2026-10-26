@@ -9,6 +9,7 @@ Vanilla HTML + ES modules + Tailwind CDN + Anime.js v4. **No build step**: it de
 |---|---|
 | 📑 Tab view | Bottom tab bar: Overview · Add · Budget · History. Deep links (`#history`), arrow-key navigation, opens on **Add** |
 | ➕ Quick add | Item, price, optional quantity (1 if empty), category. Live `Total = Price × Qty`. Enter submits |
+| 🧮 Split receipt | Break one expense into receipt lines (Steak 30 + Drink 10 + Dessert 10); the total sums itself, items are saved, searchable, shown in History and exported to CSV |
 | 📊 Overview | Spent Today, This Month, daily average and a per-category breakdown for the month |
 | 🎯 Daily budget | Progress bar: 🟢 < 80% · 🟡 80–100% · 🔴 > 100%, plus one-tap presets |
 | 📌 Spent-today strip | Shown on every tab with a budget status dot; History tab badge counts today's items |
@@ -38,6 +39,7 @@ budget-tracker/
 │       │   └── constants.js    # Storage keys, currencies, categories, thresholds
 │       ├── core/
 │       │   ├── store.js        # State, actions, pub/sub, validation and hydration
+│       │   ├── breakdown.js    # Receipt line items: sanitize, sum, labels
 │       │   ├── selectors.js    # Pure derived data (today/month stats, filter, group)
 │       │   └── validation.js   # Pure expense validation shared by Add + Edit
 │       ├── services/
@@ -55,6 +57,7 @@ budget-tracker/
 │       │   ├── expense-form.js
 │       │   ├── edit-sheet.js   # <dialog> bottom sheet for editing an expense
 │       │   ├── category-picker.js  # Reusable category radio group
+│       │   ├── price-breakdown.js  # "Split receipt" line-item editor (Add + Edit)
 │       │   ├── transaction-list.js
 │       │   └── toast.js
 │       └── utils/              # Small pure helpers

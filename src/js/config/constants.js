@@ -32,6 +32,10 @@ export const FALLBACK_CATEGORY = 'other';
 
 export const MAX_NAME_LENGTH = 80;
 
+/** Receipt breakdown limits. */
+export const MAX_BREAKDOWN_ITEMS = 30;
+export const MAX_ITEM_LABEL_LENGTH = 40;
+
 /** Budget progress thresholds (percent of daily target). */
 export const BUDGET_THRESHOLDS = Object.freeze({ warning: 80, over: 100 });
 

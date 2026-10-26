@@ -4,11 +4,13 @@ import * as motion from '../services/motion.js';
 import { byId, hasOnScreenKeyboard } from '../utils/dom.js';
 import { formatMoney } from '../utils/number.js';
 import { createCategoryPicker } from './category-picker.js';
+import { createPriceBreakdown } from './price-breakdown.js';
 import { onTabChange } from './tabs.js';
 import { showToast } from './toast.js';
 
 let els;
 let picker;
+let breakdown;
 
 function updatePreview() {
   els.preview.textContent = formatMoney(previewTotal(els.price.value, els.qty.value), getCurrency());
@@ -22,13 +24,21 @@ function showError(message, focusEl) {
 }
 
 function submit() {
-  const result = validateExpense({ name: els.name.value, price: els.price.value, qty: els.qty.value });
-  if (!result.ok) return showError(result.message, els[result.field]);
+  const result = validateExpense({
+    name: els.name.value,
+    price: els.price.value,
+    qty: els.qty.value,
+    items: breakdown.active ? breakdown.rows() : undefined,
+  });
+  if (!result.ok) {
+    return showError(result.message, result.field === 'items' ? breakdown.amountInput(result.index) : els[result.field]);
+  }
   showError('');
 
   const tx = addTransaction({ ...result.values, category: picker.value });
 
   els.form.reset();
+  breakdown.reset();
   updatePreview();
   els.name.focus();
   motion.pop(els.submit, 1.05);
@@ -40,6 +50,7 @@ function handleEnterKey(event, next) {
   if (event.key !== 'Enter') return;
   event.preventDefault();
   if (!next || (els.name.value.trim() && els.price.value.trim())) submit();
+  else if (next === els.price && breakdown.active) breakdown.focusFirstEmpty();
   else next.focus();
 }
 
@@ -64,6 +75,7 @@ export function mount() {
   [els.price, els.qty].forEach((el) => el.addEventListener('input', updatePreview));
 
   picker = createCategoryPicker(byId('categoryPicker'));
+  breakdown = createPriceBreakdown(byId('addBreakdown'), { price: els.price, qty: els.qty, onChange: updatePreview });
 
   onTabChange((tab, { previous, viaKeyboard }) => {
     // Leaving Add: close the on-screen keyboard instead of carrying it to another tab.
@@ -83,5 +95,6 @@ export function mount() {
 
 /** Only the live total depends on store state (currency). */
 export function render() {
+  breakdown.refresh();
   updatePreview();
 }

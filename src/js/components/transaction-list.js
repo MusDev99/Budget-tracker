@@ -1,4 +1,5 @@
 import { CATEGORIES, CATEGORY_MAP } from '../config/constants.js';
+import { itemLabels } from '../core/breakdown.js';
 import { filterTransactions, groupByDay } from '../core/selectors.js';
 import { deleteTransaction, getCurrency, getState } from '../core/store.js';
 import * as motion from '../services/motion.js';
@@ -44,7 +45,9 @@ function rowHtml(tx, currency) {
             <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-md border ${category.badge}">${category.label}</span>
             <span class="text-[11px] text-slate-500">${formatTime(tx.ts)}</span>
             ${qtyText ? `<span class="text-[11px] text-slate-500 tabular-nums">· ${qtyText}</span>` : ''}
+            ${tx.items ? `<span class="text-[10px] font-medium px-1.5 py-0.5 rounded-md border border-amber-500/30 bg-amber-500/10 text-amber-300">${tx.items.length} items</span>` : ''}
           </span>
+          ${tx.items ? `<span class="block mt-0.5 text-[11px] text-slate-500 truncate">${escapeHtml(itemLabels(tx.items))}</span>` : ''}
         </span>
         <span class="text-sm font-semibold tabular-nums whitespace-nowrap">${formatMoney(tx.total, currency)}</span>
       </button>

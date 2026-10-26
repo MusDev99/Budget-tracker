@@ -178,6 +178,8 @@
                 class="w-full min-h-[44px] rounded-xl bg-slate-950 border border-slate-800 px-3 text-base tabular-nums placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
             </div>
           </div>
+          <!-- Receipt breakdown (components/price-breakdown.js) -->
+          <div id="addBreakdown"></div>
           <div>
             <span id="catLabel" class="block text-xs text-slate-400 mb-1">Category</span>
             <div id="categoryPicker" role="radiogroup" aria-labelledby="catLabel" class="grid grid-cols-3 gap-2"></div>
@@ -282,6 +284,7 @@
           <input id="editQty" type="number" inputmode="decimal" enterkeyhint="done" step="any" min="0" placeholder="1" class="w-full min-h-[44px] rounded-xl bg-slate-950 border border-slate-800 px-3 text-base placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 tabular-nums" />
         </div>
       </div>
+      <div id="editBreakdown"></div>
       <div>
         <label for="editDate" class="block text-xs text-slate-400 mb-1">Date</label>
         <input id="editDate" type="date" required class="w-full min-h-[44px] rounded-xl bg-slate-950 border border-slate-800 px-3 text-base placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 [color-scheme:dark]" />

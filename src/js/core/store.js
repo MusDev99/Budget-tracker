@@ -11,6 +11,7 @@ import {
   MAX_NAME_LENGTH,
   STORAGE_KEYS,
 } from '../config/constants.js';
+import { sanitizeItems, sumItems } from './breakdown.js';
 import * as storage from '../services/storage.js';
 import { isDateKey, toDateKey } from '../utils/date.js';
 import { createId } from '../utils/id.js';
@@ -26,6 +27,8 @@ import { round2 } from '../utils/number.js';
  * @property {string} category  Key of CATEGORY_MAP
  * @property {number} ts        Epoch ms
  * @property {string} date      Local YYYY-MM-DD
+ * @property {import('./breakdown.js').BreakdownItem[]} [items]  Receipt breakdown; when present
+ *           price = sum of items and qty = 1
  */
 
 const state = {
@@ -42,12 +45,14 @@ const listeners = new Set();
 export function sanitizeTransaction(raw) {
   if (!raw || typeof raw !== 'object') return null;
 
-  const price = Number(raw.price);
-  const qty = Number(raw.qty);
+  const items = sanitizeItems(raw.items);
+  // A breakdown is the source of truth for the amount: price = sum of items, qty = 1.
+  const price = items.length ? sumItems(items) : Number(raw.price);
+  const qty = items.length ? 1 : Number(raw.qty);
   const ts = typeof raw.ts === 'number' ? raw.ts : Date.parse(raw.ts);
   if (![price, qty, ts].every(Number.isFinite)) return null;
 
-  return {
+  const tx = {
     id: String(raw.id || createId()),
     name: String(raw.name || 'Untitled').slice(0, MAX_NAME_LENGTH),
     price: round2(price),
@@ -57,6 +62,8 @@ export function sanitizeTransaction(raw) {
     ts,
     date: isDateKey(raw.date) ? raw.date : toDateKey(new Date(ts)),
   };
+  if (items.length) tx.items = items;
+  return tx;
 }
 
 export function sanitizeSettings(raw) {
@@ -110,9 +117,9 @@ export const getCurrency = () =>
   CURRENCIES.find((c) => c.code === state.settings.currency) ?? CURRENCIES[0];
 
 /** @returns {Transaction} */
-export function addTransaction({ name, price, qty, category }) {
+export function addTransaction({ name, price, qty, category, items }) {
   const now = new Date();
-  const tx = sanitizeTransaction({ id: createId(), name, price, qty, category, ts: now.getTime(), date: toDateKey(now) });
+  const tx = sanitizeTransaction({ id: createId(), name, price, qty, category, items, ts: now.getTime(), date: toDateKey(now) });
   state.transactions.push(tx);
   persistTransactions();
   emit();
@@ -123,7 +130,8 @@ export function addTransaction({ name, price, qty, category }) {
  * Apply edits to an existing transaction. Changing `date` moves it to that day but keeps
  * its time of day, so ordering within the day stays sensible.
  * @param {string} id
- * @param {Partial<Pick<Transaction, 'name' | 'price' | 'qty' | 'category' | 'date'>>} changes
+ * @param {Partial<Pick<Transaction, 'name' | 'price' | 'qty' | 'category' | 'date' | 'items'>>} changes
+ *        Pass `items: []` to remove a breakdown.
  * @returns {Transaction | null} the updated transaction, or null if it no longer exists
  */
 export function updateTransaction(id, changes) {

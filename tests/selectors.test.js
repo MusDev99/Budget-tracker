@@ -53,3 +53,8 @@ test('selectCategoryBreakdown: current month only, largest first, percent of tot
   assert.equal(Math.round(result[0].percent + result[1].percent), 100);
   assert.deepEqual(selectCategoryBreakdown([], now), []);
 });
+
+test('filterTransactions also matches breakdown item labels', () => {
+  const steak = tx('e', '2026-10-20', 50, { name: 'Gordon Steak', items: [{ label: 'Ribeye', amount: 30 }, { label: 'Lychee drink', amount: 20 }] });
+  assert.deepEqual(filterTransactions([...data, steak], { query: 'lychee' }).map((t) => t.id), ['e']);
+});

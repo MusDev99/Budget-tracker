@@ -42,3 +42,27 @@ test('deleteTransaction removes and returns the transaction', () => {
   assert.equal(store.deleteTransaction(tx.id).id, tx.id);
   assert.equal(store.getState().transactions.some((t) => t.id === tx.id), false);
 });
+
+test('breakdown items drive the amount and can be removed by an edit', () => {
+  const tx = store.addTransaction({
+    name: 'Gordon Steak Restaurant',
+    price: 999,
+    qty: 4,
+    category: 'food',
+    items: [{ label: 'Steak', amount: 30 }, { label: 'Drink', amount: 10 }, { label: 'Dessert', amount: 10 }],
+  });
+  assert.deepEqual([tx.price, tx.qty, tx.total, tx.items.length], [50, 1, 50, 3]);
+
+  const plain = store.updateTransaction(tx.id, { price: 45, qty: 1, items: [] });
+  assert.equal(plain.items, undefined);
+  assert.equal(plain.total, 45);
+});
+
+test('sanitizeTransaction drops invalid breakdown items from storage', () => {
+  const t = store.sanitizeTransaction({
+    name: 'x', price: 1, qty: 1, ts: Date.now(),
+    items: [{ label: 'ok', amount: 5 }, { label: 'bad', amount: -1 }, { amount: 'abc' }, null],
+  });
+  assert.deepEqual(t.items, [{ label: 'ok', amount: 5 }]);
+  assert.equal(t.total, 5);
+});

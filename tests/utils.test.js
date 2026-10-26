@@ -35,3 +35,15 @@ test('sanitizeTransaction rejects garbage and recomputes total', () => {
   assert.equal(t.total, 9);
   assert.equal(t.category, 'other');
 });
+
+test('CSV export adds a Breakdown column', async () => {
+  const { buildTransactionsCsv } = await import('../src/js/services/export.js');
+  const csv = buildTransactionsCsv(
+    [{ date: '2026-10-26', ts: Date.parse('2026-10-26T12:30:00'), name: 'Gordon Steak', category: 'food', price: 50, qty: 1, total: 50,
+       items: [{ label: 'Steak', amount: 30 }, { label: 'Drink', amount: 20 }] }],
+    { code: 'MYR' },
+  );
+  const [header, row] = csv.replace('﻿', '').split('\r\n');
+  assert.ok(header.endsWith(',Breakdown'));
+  assert.ok(row.endsWith(',Steak 30.00; Drink 20.00'));
+});

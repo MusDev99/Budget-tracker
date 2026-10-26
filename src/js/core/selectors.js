@@ -37,12 +37,18 @@ export function selectBudgetStatus(spent, budget) {
   return { percent, level, remaining: round2(budget - spent) };
 }
 
-/** Filter by category + free-text (matches item name or category label), newest first. */
+/** Filter by category + free-text (matches name, category label or breakdown item), newest first. */
 export function filterTransactions(transactions, { query = '', category = 'all' } = {}) {
   const q = query.trim().toLowerCase();
   return transactions
     .filter((t) => category === 'all' || t.category === category)
-    .filter((t) => !q || t.name.toLowerCase().includes(q) || CATEGORY_MAP[t.category].label.toLowerCase().includes(q))
+    .filter(
+      (t) =>
+        !q ||
+        t.name.toLowerCase().includes(q) ||
+        CATEGORY_MAP[t.category].label.toLowerCase().includes(q) ||
+        (t.items ?? []).some((item) => item.label.toLowerCase().includes(q)),
+    )
     .sort((a, b) => b.ts - a.ts);
 }
 

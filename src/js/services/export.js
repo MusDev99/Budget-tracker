@@ -1,8 +1,9 @@
 import { CATEGORY_MAP } from '../config/constants.js';
+import { itemsToText } from '../core/breakdown.js';
 import { toCsv } from '../utils/csv.js';
 import { formatClock24, toDateKey } from '../utils/date.js';
 
-const HEADER = ['Date', 'Time', 'Item', 'Category', 'Unit Price', 'Quantity', 'Total', 'Currency'];
+const HEADER = ['Date', 'Time', 'Item', 'Category', 'Unit Price', 'Quantity', 'Total', 'Currency', 'Breakdown'];
 
 /** Build the CSV text for a list of transactions (oldest first). */
 export function buildTransactionsCsv(transactions, currency) {
@@ -17,6 +18,7 @@ export function buildTransactionsCsv(transactions, currency) {
       t.qty,
       t.total.toFixed(2),
       currency.code,
+      itemsToText(t.items ?? []),
     ]);
   // BOM so Excel opens UTF-8 correctly.
   return '﻿' + toCsv([HEADER, ...rows]);

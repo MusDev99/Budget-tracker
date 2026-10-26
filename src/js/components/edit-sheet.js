@@ -9,10 +9,12 @@ import { toDateKey } from '../utils/date.js';
 import { byId, hasOnScreenKeyboard } from '../utils/dom.js';
 import { formatMoney } from '../utils/number.js';
 import { createCategoryPicker } from './category-picker.js';
+import { createPriceBreakdown } from './price-breakdown.js';
 import { showToast } from './toast.js';
 
 let els;
 let picker;
+let breakdown;
 let editingId = null;
 let closing = false;
 
@@ -45,6 +47,7 @@ export function openEditSheet(id) {
   els.date.value = tx.date;
   els.date.max = toDateKey();
   picker.set(tx.category);
+  breakdown.load(tx.items ?? []);
   showError('');
   updatePreview();
 
@@ -68,8 +71,11 @@ function save() {
     price: els.price.value,
     qty: els.qty.value,
     date: els.date.value,
+    items: breakdown.active ? breakdown.rows() : undefined,
   });
-  if (!result.ok) return showError(result.message, els[result.field]);
+  if (!result.ok) {
+    return showError(result.message, result.field === 'items' ? breakdown.amountInput(result.index) : els[result.field]);
+  }
 
   const updated = updateTransaction(editingId, { ...result.values, category: picker.value });
   closeSheet();
@@ -96,6 +102,7 @@ export function mount() {
     error: byId('editError'),
   };
   picker = createCategoryPicker(byId('editCategoryPicker'));
+  breakdown = createPriceBreakdown(byId('editBreakdown'), { price: els.price, qty: els.qty, onChange: updatePreview });
 
   els.form.addEventListener('submit', (event) => {
     event.preventDefault();
@@ -120,5 +127,7 @@ export function mount() {
 
 /** Keep the live total in the right currency if it's toggled while the sheet is open. */
 export function render() {
-  if (els.dialog.open) updatePreview();
+  if (!els.dialog.open) return;
+  breakdown.refresh();
+  updatePreview();
 }
