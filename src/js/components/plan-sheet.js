@@ -18,12 +18,17 @@ let closing = false;
 
 const rowEls = () => [...els.rows.querySelectorAll('[data-row]')];
 const readRows = () =>
-  rowEls().map((row) => ({ label: row.querySelector('[data-label]').value, amount: row.querySelector('[data-amount]').value }));
+  rowEls().map((row) => ({
+    id: row.dataset.id || undefined, // existing commitments keep their id (and their paid tick)
+    label: row.querySelector('[data-label]').value,
+    amount: row.querySelector('[data-amount]').value,
+  }));
 
-function addRow({ label = '', amount = '' } = {}, { focus = false } = {}) {
+function addRow({ id = '', label = '', amount = '' } = {}, { focus = false } = {}) {
   if (rowEls().length >= MAX_COMMITMENTS) return;
   const row = document.createElement('li');
   row.dataset.row = '';
+  if (id) row.dataset.id = id;
   row.className = 'grid grid-cols-[minmax(0,1fr)_6.5rem_auto] gap-2 items-center';
   row.innerHTML = `
     <input data-label type="text" maxlength="${MAX_ITEM_LABEL_LENGTH}" enterkeyhint="next" placeholder="e.g. Car finance" class="${INPUT}" />
@@ -93,7 +98,7 @@ export function openPlanSheet() {
 
   els.rows.innerHTML = '';
   els.salary.value = plan ? plan.salary.toFixed(2) : '';
-  (plan?.commitments ?? []).forEach((c) => addRow({ label: c.label, amount: c.amount.toFixed(2) }));
+  (plan?.commitments ?? []).forEach((c) => addRow({ id: c.id, label: c.label, amount: c.amount.toFixed(2) }));
   if (!plan) addRow();
   els.clear.classList.toggle('invisible', !plan);
   showError('');

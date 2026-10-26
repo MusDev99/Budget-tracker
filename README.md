@@ -12,6 +12,7 @@ Vanilla HTML + ES modules + Tailwind CDN + Anime.js v4. **No build step**: it de
 | 🧮 Split receipt | Break one expense into receipt lines (Steak 30 + Drink 10 + Dessert 10); the total sums itself, items are saved, searchable, shown in History and exported to CSV |
 | 📊 Overview | Spent Today, This Month, daily average and a per-category breakdown for the month |
 | 🏦 Monthly plan | Enter net salary + fixed commitments (car finance, house, bills). The rest is your flexible balance; BudgetCare suggests a daily limit = (flexible − spent on earlier days) ÷ days left, recalculated every day |
+| ✅ Paid tracking | Commitments repeat every month with no re-entry. Tap one to tick it paid for this month (resets itself next month); shows "Paid 2 of 3 · RM x still to pay" |
 | 🎯 Daily budget | Progress bar: 🟢 < 80% · 🟡 80–100% · 🔴 > 100%, plus one-tap presets |
 | 📌 Spent-today strip | Shown on every tab with a budget status dot; History tab badge counts today's items |
 | 🧾 History | Grouped by day, category badges, search + category filter, 1-tap delete |

@@ -66,3 +66,17 @@ test('sanitizeTransaction drops invalid breakdown items from storage', () => {
   assert.deepEqual(t.items, [{ label: 'ok', amount: 5 }]);
   assert.equal(t.total, 5);
 });
+
+test('togglePaid ticks and unticks per month, and survives a plan edit (stable ids)', () => {
+  store.setPlan({ salary: 5000, commitments: [{ id: 'car', label: 'Car', amount: 1200 }, { id: 'house', label: 'House', amount: 1500 }] });
+  const october = new Date(2026, 9, 15);
+  assert.equal(store.togglePaid('car', october), true);
+  assert.deepEqual(store.getState().settings.paid['2026-10'], ['car']);
+  assert.equal(JSON.parse(memory.get('dbt.settings.v1')).paid['2026-10'][0], 'car', 'persisted');
+
+  store.setPlan({ salary: 5200, commitments: [{ id: 'car', label: 'Car loan', amount: 1250 }] }); // rename + new amount
+  assert.deepEqual(store.getState().settings.paid['2026-10'], ['car']);
+
+  assert.equal(store.togglePaid('car', october), false);
+  assert.deepEqual(store.getState().settings.paid['2026-10'], []);
+});

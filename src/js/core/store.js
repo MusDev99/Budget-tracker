@@ -12,7 +12,7 @@ import {
   STORAGE_KEYS,
 } from '../config/constants.js';
 import { sanitizeItems, sumItems } from './breakdown.js';
-import { sanitizePlan } from './plan.js';
+import { sanitizePaid, sanitizePlan } from './plan.js';
 import * as storage from '../services/storage.js';
 import { isDateKey, toDateKey } from '../utils/date.js';
 import { createId } from '../utils/id.js';
@@ -35,7 +35,7 @@ import { round2 } from '../utils/number.js';
 const state = {
   /** @type {Transaction[]} */
   transactions: [],
-  settings: { currency: DEFAULT_CURRENCY, dailyBudget: 0, soundOn: true, plan: null },
+  settings: { currency: DEFAULT_CURRENCY, dailyBudget: 0, soundOn: true, plan: null, paid: {} },
 };
 
 const listeners = new Set();
@@ -74,6 +74,7 @@ export function sanitizeSettings(raw) {
     dailyBudget: Number.isFinite(budget) && budget > 0 ? round2(budget) : 0,
     soundOn: raw?.soundOn !== false, // default on; only an explicit false mutes
     plan: sanitizePlan(raw?.plan), // null until the user sets a salary
+    paid: sanitizePaid(raw?.paid), // { 'YYYY-MM': [commitmentId] }
   };
 }
 
@@ -103,6 +104,9 @@ const persistSettings = () => storage.write(STORAGE_KEYS.settings, state.setting
 export function initStore() {
   state.transactions = loadTransactions();
   state.settings = loadSettings();
+  // Plans saved before commitments had ids get theirs generated on load; persist them once
+  // so "paid" ticks stay attached across reloads.
+  if (state.settings.plan) persistSettings();
 
   // Keep multiple open tabs in sync.
   window.addEventListener('storage', (event) => {
@@ -180,6 +184,19 @@ export function setPlan(plan) {
   persistSettings();
   emit();
   return state.settings.plan;
+}
+
+/** Tick / untick a commitment as paid for the current month. @returns {boolean} now paid */
+export function togglePaid(id, now = new Date()) {
+  const month = toDateKey(now).slice(0, 7);
+  const ticked = new Set(state.settings.paid[month] ?? []);
+  const nowPaid = !ticked.has(id);
+  if (nowPaid) ticked.add(id);
+  else ticked.delete(id);
+  state.settings = sanitizeSettings({ ...state.settings, paid: { ...state.settings.paid, [month]: [...ticked] } });
+  persistSettings();
+  emit();
+  return nowPaid;
 }
 
 export function toggleSound() {

@@ -6,11 +6,13 @@
  * Pure functions only — shared by the store, selectors, UI and tests.
  */
 import { MAX_COMMITMENTS, MAX_ITEM_LABEL_LENGTH } from '../config/constants.js';
-import { toDateKey } from '../utils/date.js';
+import { toDateKey, toMonthKey } from '../utils/date.js';
+import { createId } from '../utils/id.js';
 import { round2 } from '../utils/number.js';
 
 /**
  * @typedef {Object} Commitment
+ * @property {string} id      Stable across edits, so "paid" ticks survive renames and amount changes
  * @property {string} label
  * @property {number} amount  Per month, 2dp, > 0
  *
@@ -26,7 +28,7 @@ export function sanitizePlan(raw) {
   const salary = round2(Number(raw?.salary));
   if (!Number.isFinite(salary) || salary <= 0) return null;
   const commitments = (Array.isArray(raw.commitments) ? raw.commitments : [])
-    .map((c) => ({ label: String(c?.label ?? '').trim().slice(0, MAX_ITEM_LABEL_LENGTH), amount: round2(Number(c?.amount)) }))
+    .map((c) => ({ id: String(c?.id || createId()), label: String(c?.label ?? '').trim().slice(0, MAX_ITEM_LABEL_LENGTH), amount: round2(Number(c?.amount)) }))
     .filter((c) => Number.isFinite(c.amount) && c.amount > 0)
     .slice(0, MAX_COMMITMENTS)
     .map((c, i) => ({ ...c, label: c.label || `Commitment ${i + 1}` }));
@@ -52,7 +54,7 @@ export function validatePlan({ salary, rows }) {
     const name = label ? `"${label}"` : `commitment ${index + 1}`;
     if (amountText === '' || !Number.isFinite(amount)) return { ok: false, field: 'commitments', index, message: `Enter an amount for ${name}.` };
     if (amount <= 0) return { ok: false, field: 'commitments', index, message: `Amount for ${name} must be more than 0.` };
-    commitments.push({ label: label || `Commitment ${commitments.length + 1}`, amount: round2(amount) });
+    commitments.push({ id: String(row.id || createId()), label: label || `Commitment ${commitments.length + 1}`, amount: round2(amount) });
   }
 
   if (salaryText === '' && commitments.length === 0) return { ok: true, plan: null };
@@ -65,6 +67,35 @@ export function validatePlan({ salary, rows }) {
     return { ok: false, field: 'commitments', message: `Up to ${MAX_COMMITMENTS} commitments.` };
   }
   return { ok: true, plan: { salary: round2(salaryValue), commitments } };
+}
+
+/**
+ * Keep only the last few months of "paid" ticks: { 'YYYY-MM': [commitmentId, ...] }.
+ * Each month starts with nothing ticked, so there is nothing to re-enter or reset.
+ */
+export function sanitizePaid(raw) {
+  if (!raw || typeof raw !== 'object') return {};
+  return Object.fromEntries(
+    Object.keys(raw)
+      .filter((month) => /^\d{4}-\d{2}$/.test(month) && Array.isArray(raw[month]))
+      .sort()
+      .slice(-3)
+      .map((month) => [month, [...new Set(raw[month].map(String))]]),
+  );
+}
+
+/** Paid vs still-to-pay commitments for the month of `now`. Unknown ids are ignored. */
+export function paidSummary(plan, paid, now = new Date()) {
+  const ticked = new Set(paid?.[toMonthKey(now)] ?? []);
+  const paidItems = plan.commitments.filter((c) => ticked.has(c.id));
+  const paidAmount = sumCommitments(paidItems);
+  return {
+    paidIds: new Set(paidItems.map((c) => c.id)),
+    paidCount: paidItems.length,
+    paidAmount,
+    unpaidAmount: round2(sumCommitments(plan.commitments) - paidAmount),
+    allPaid: plan.commitments.length > 0 && paidItems.length === plan.commitments.length,
+  };
 }
 
 export const daysInMonth = (d) => new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();

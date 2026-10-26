@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { computePlan, sanitizePlan, validatePlan } from '../src/js/core/plan.js';
+import { computePlan, paidSummary, sanitizePaid, sanitizePlan, validatePlan } from '../src/js/core/plan.js';
 import { selectDailyLimit } from '../src/js/core/selectors.js';
 
 const plan = {
@@ -64,7 +64,9 @@ test('last day of the month: all that is left can be spent today', () => {
 
 test('validatePlan: rows, defaults, clearing, errors', () => {
   const ok = validatePlan({ salary: '5000', rows: [{ label: 'Car', amount: '1200' }, { label: '', amount: '' }, { label: '', amount: '300' }] });
-  assert.deepEqual(ok.plan, { salary: 5000, commitments: [{ label: 'Car', amount: 1200 }, { label: 'Commitment 2', amount: 300 }] });
+  assert.deepEqual(ok.plan.commitments.map(({ label, amount }) => ({ label, amount })), [{ label: 'Car', amount: 1200 }, { label: 'Commitment 2', amount: 300 }]);
+  assert.ok(ok.plan.commitments.every((c) => c.id), 'every commitment gets an id');
+  assert.equal(validatePlan({ salary: '1', rows: [{ id: 'keep-me', label: 'x', amount: '1' }] }).plan.commitments[0].id, 'keep-me');
   assert.deepEqual(validatePlan({ salary: '', rows: [] }), { ok: true, plan: null });
   assert.equal(validatePlan({ salary: '', rows: [{ label: 'Car', amount: '1' }] }).field, 'salary');
   assert.equal(validatePlan({ salary: '0', rows: [] }).field, 'salary');
@@ -74,11 +76,35 @@ test('validatePlan: rows, defaults, clearing, errors', () => {
 test('sanitizePlan drops junk and returns null without a salary', () => {
   assert.equal(sanitizePlan(null), null);
   assert.equal(sanitizePlan({ salary: 'abc' }), null);
-  assert.deepEqual(sanitizePlan({ salary: 10, commitments: [{ label: 'ok', amount: 1 }, { amount: -1 }, null] }), { salary: 10, commitments: [{ label: 'ok', amount: 1 }] });
+  const clean = sanitizePlan({ salary: 10, commitments: [{ id: 'a', label: 'ok', amount: 1 }, { amount: -1 }, null] });
+  assert.deepEqual(clean, { salary: 10, commitments: [{ id: 'a', label: 'ok', amount: 1 }] });
 });
 
 test('selectDailyLimit: plan beats manual, manual beats nothing', () => {
   assert.equal(selectDailyLimit({ plan, dailyBudget: 99 }, [tx('2026-10-10', 1500)], oct26).source, 'plan');
   assert.deepEqual(selectDailyLimit({ plan: null, dailyBudget: 99 }, [], oct26), { limit: 99, source: 'manual', plan: null });
   assert.equal(selectDailyLimit({ plan: null, dailyBudget: 0 }, [], oct26).source, null);
+});
+
+const withIds = { salary: 5000, commitments: [{ id: 'car', label: 'Car', amount: 1200 }, { id: 'house', label: 'House', amount: 1500 }, { id: 'bills', label: 'Bills', amount: 500 }] };
+
+test('paidSummary counts only this month and ignores unknown ids', () => {
+  const paid = { '2026-10': ['car', 'bills', 'gone'], '2026-09': ['house'] };
+  const r = paidSummary(withIds, paid, oct26);
+  assert.deepEqual([r.paidCount, r.paidAmount, r.unpaidAmount, r.allPaid], [2, 1700, 1500, false]);
+  assert.equal(r.paidIds.has('house'), false);
+});
+
+test('a new month starts with nothing paid — no re-entry needed', () => {
+  const paid = { '2026-10': ['car', 'house', 'bills'] };
+  assert.equal(paidSummary(withIds, paid, oct26).allPaid, true);
+  const november = paidSummary(withIds, paid, new Date(2026, 10, 1));
+  assert.deepEqual([november.paidCount, november.unpaidAmount], [0, 3200]);
+});
+
+test('sanitizePaid keeps the last 3 months and drops junk', () => {
+  const clean = sanitizePaid({ '2026-05': ['a'], '2026-07': ['a'], '2026-08': ['b', 'b'], '2026-10': ['c'], bad: ['x'], '2026-09': 'nope' });
+  assert.deepEqual(Object.keys(clean), ['2026-07', '2026-08', '2026-10']);
+  assert.deepEqual(clean['2026-08'], ['b']);
+  assert.deepEqual(sanitizePaid(null), {});
 });
