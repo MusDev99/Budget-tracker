@@ -13,6 +13,7 @@ Vanilla HTML + ES modules + Tailwind CDN + Anime.js v4. **No build step**: it de
 | 📊 Overview | Spent Today, This Month, daily average and a per-category breakdown for the month |
 | 🏦 Monthly plan | Enter net salary + fixed commitments (car finance, house, bills). The rest is your flexible balance; BudgetCare suggests a daily limit = (flexible − spent on earlier days) ÷ days left, recalculated every day |
 | ✅ Paid tracking | Commitments repeat every month with no re-entry. Tap one to tick it paid for this month (resets itself next month); shows "Paid 2 of 3 · RM x still to pay" |
+| 💸 Unpaid commitments | Overview card listing what is still to pay this month (total + one-tap mark as paid); done state when all are paid |
 | 🎯 Daily budget | Progress bar: 🟢 < 80% · 🟡 80–100% · 🔴 > 100%, plus one-tap presets |
 | 📌 Spent-today strip | Shown on every tab with a budget status dot; History tab badge counts today's items |
 | 🧾 History | Grouped by day, category badges, search + category filter, 1-tap delete |
@@ -57,6 +58,7 @@ budgetcare/
 │       │   ├── header.js
 │       │   ├── summary-cards.js
 │       │   ├── budget-card.js  # Today vs limit (suggested limit when a plan exists)
+│       │   ├── unpaid-commitments.js  # Overview card: unpaid commitments, tap to pay
 │       │   ├── plan-card.js    # Monthly plan summary on the Budget tab
 │       │   ├── plan-sheet.js   # Bottom sheet to edit salary + commitments
 │       │   ├── expense-form.js

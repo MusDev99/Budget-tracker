@@ -12,6 +12,7 @@ import * as summaryCards from './components/summary-cards.js';
 import * as tabs from './components/tabs.js';
 import { showToast } from './components/toast.js';
 import * as transactionList from './components/transaction-list.js';
+import * as unpaidCommitments from './components/unpaid-commitments.js';
 import { getState, initStore, refresh, subscribe } from './core/store.js';
 import * as motion from './services/motion.js';
 import { onWriteError } from './services/storage.js';
@@ -19,7 +20,7 @@ import { toDateKey } from './utils/date.js';
 import { refreshIcons } from './utils/dom.js';
 
 // Order matters: tabs mount first so the initial activation doesn't trigger other components' tab listeners.
-const components = [tabs, header, summaryCards, budgetCard, planCard, planSheet, expenseForm, transactionList, editSheet, installPrompt];
+const components = [tabs, header, summaryCards, unpaidCommitments, budgetCard, planCard, planSheet, expenseForm, transactionList, editSheet, installPrompt];
 
 function renderAll(state = getState()) {
   components.forEach((component) => component.render(state));
