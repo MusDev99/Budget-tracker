@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "Daily Budget & Expense Tracker",
-  "short_name": "Budget",
-  "description": "Quick on-the-go expense entry with a daily budget target. Works offline.",
+  "name": "BudgetCare",
+  "short_name": "BudgetCare",
+  "description": "Plan your month around fixed commitments, get a smart daily spending limit, and track expenses. Works offline.",
   "start_url": "./#add",
   "scope": "./",
   "display": "standalone",

@@ -36,6 +36,12 @@ export const MAX_NAME_LENGTH = 80;
 export const MAX_BREAKDOWN_ITEMS = 30;
 export const MAX_ITEM_LABEL_LENGTH = 40;
 
+/** Monthly plan limits + one-tap commitment suggestions. */
+export const MAX_COMMITMENTS = 20;
+export const COMMITMENT_SUGGESTIONS = Object.freeze(['Car finance', 'House / Rent', 'Utilities', 'Insurance', 'Phone & internet', 'Savings']);
+
+export const APP_NAME = 'BudgetCare';
+
 /** Budget progress thresholds (percent of daily target). */
 export const BUDGET_THRESHOLDS = Object.freeze({ warning: 80, over: 100 });
 

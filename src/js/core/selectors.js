@@ -3,6 +3,7 @@
  */
 import { BUDGET_THRESHOLDS, CATEGORY_MAP } from '../config/constants.js';
 import { toDateKey, toMonthKey } from '../utils/date.js';
+import { computePlan } from './plan.js';
 import { round2, sumBy } from '../utils/number.js';
 
 export function selectTodayStats(transactions, now = new Date()) {
@@ -28,6 +29,20 @@ export function selectCategoryBreakdown(transactions, now = new Date()) {
   return [...totals]
     .map(([category, total]) => ({ category, total: round2(total), percent: grand ? (total / grand) * 100 : 0 }))
     .sort((a, b) => b.total - a.total);
+}
+
+/**
+ * The daily limit the app uses everywhere. A monthly plan wins (suggested limit);
+ * otherwise the manual limit; otherwise none.
+ * @returns {{ limit: number, source: 'plan' | 'manual' | null, plan: ReturnType<typeof computePlan> | null }}
+ */
+export function selectDailyLimit(settings, transactions, now = new Date()) {
+  if (settings.plan) {
+    const plan = computePlan(settings.plan, transactions, now);
+    return { limit: plan.dailyLimit, source: 'plan', plan };
+  }
+  if (settings.dailyBudget) return { limit: settings.dailyBudget, source: 'manual', plan: null };
+  return { limit: 0, source: null, plan: null };
 }
 
 /** @returns {'ok' | 'warning' | 'over'} */

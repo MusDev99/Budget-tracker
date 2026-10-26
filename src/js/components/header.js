@@ -1,4 +1,4 @@
-import { selectBudgetStatus, selectTodayStats } from '../core/selectors.js';
+import { selectBudgetStatus, selectDailyLimit, selectTodayStats } from '../core/selectors.js';
 import { cycleCurrency, getCurrency, getState } from '../core/store.js';
 import { exportTransactionsCsv } from '../services/export.js';
 import * as motion from '../services/motion.js';
@@ -33,7 +33,9 @@ export function render({ transactions, settings }) {
   motion.countTo(byId('headerToday'), today.total, (n) => formatMoney(n, currency));
   const dot = byId('headerBudgetDot');
   dot.className = 'h-2.5 w-2.5 rounded-full';
-  if (settings.dailyBudget) dot.classList.add(DOT_COLORS[selectBudgetStatus(today.total, settings.dailyBudget).level]);
+  const { limit, source } = selectDailyLimit(settings, transactions);
+  if (limit) dot.classList.add(DOT_COLORS[selectBudgetStatus(today.total, limit).level]);
+  else if (source === 'plan') dot.classList.add(DOT_COLORS.over); // plan active but nothing left to spend
   else dot.classList.add('hidden');
 
   // Today's item count on the History tab

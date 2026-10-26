@@ -1,5 +1,5 @@
 import { BUDGET_PRESETS } from '../config/constants.js';
-import { selectBudgetStatus, selectTodayStats } from '../core/selectors.js';
+import { selectBudgetStatus, selectDailyLimit, selectTodayStats } from '../core/selectors.js';
 import { getCurrency, setDailyBudget } from '../core/store.js';
 import * as motion from '../services/motion.js';
 import { byId } from '../utils/dom.js';
@@ -52,11 +52,22 @@ export function mount() {
 }
 
 export function render({ transactions, settings }) {
-  const budget = settings.dailyBudget;
+  const { limit: budget, source } = selectDailyLimit(settings, transactions);
   const body = byId('budgetBody');
-  renderPresets(budget);
+  const fromPlan = source === 'plan';
+
+  // The manual limit only matters without a monthly plan.
+  byId('budgetForm').classList.toggle('hidden', fromPlan);
+  byId('budgetHeading').textContent = fromPlan ? "Today vs Suggested Limit" : 'Today vs Target';
+  renderPresets(settings.dailyBudget);
   // Don't overwrite what the user is typing.
-  if (document.activeElement !== byId('budgetInput')) byId('budgetInput').value = budget || '';
+  if (document.activeElement !== byId('budgetInput')) byId('budgetInput').value = settings.dailyBudget || '';
+
+  if (fromPlan && !budget) {
+    body.innerHTML = `<p class="text-sm text-rose-400">Nothing left to spend today under your monthly plan. Check the plan below.</p>`;
+    lastWidth = 0;
+    return;
+  }
 
   if (!budget) {
     body.innerHTML = `<p class="text-sm text-slate-500">No target set. Pick a preset or enter a daily limit below.</p>`;
@@ -74,7 +85,7 @@ export function render({ transactions, settings }) {
     <div class="flex items-end justify-between gap-2">
       <div>
         <div data-spent class="text-3xl font-bold tabular-nums tracking-tight">${formatMoney(spent, currency)}</div>
-        <div class="text-xs text-slate-500 mt-0.5">of ${formatMoney(budget, currency)} daily limit</div>
+        <div class="text-xs text-slate-500 mt-0.5">of ${formatMoney(budget, currency)} ${fromPlan ? 'suggested' : 'daily'} limit</div>
       </div>
       <div class="text-right">
         <div class="text-2xl font-bold tabular-nums ${style.text}">${Math.round(percent)}%</div>

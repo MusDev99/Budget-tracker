@@ -1,7 +1,7 @@
 {
-  "name": "budget-tracker",
+  "name": "budgetcare",
   "version": "1.0.0",
-  "description": "Mobile-first daily budget & expense tracker. Vanilla ES modules, zero build step.",
+  "description": "BudgetCare: monthly plan, smart daily limit and expense tracker. Vanilla ES modules, zero build step.",
   "private": true,
   "type": "module",
   "scripts": {

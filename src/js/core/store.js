@@ -12,6 +12,7 @@ import {
   STORAGE_KEYS,
 } from '../config/constants.js';
 import { sanitizeItems, sumItems } from './breakdown.js';
+import { sanitizePlan } from './plan.js';
 import * as storage from '../services/storage.js';
 import { isDateKey, toDateKey } from '../utils/date.js';
 import { createId } from '../utils/id.js';
@@ -34,7 +35,7 @@ import { round2 } from '../utils/number.js';
 const state = {
   /** @type {Transaction[]} */
   transactions: [],
-  settings: { currency: DEFAULT_CURRENCY, dailyBudget: 0, soundOn: true },
+  settings: { currency: DEFAULT_CURRENCY, dailyBudget: 0, soundOn: true, plan: null },
 };
 
 const listeners = new Set();
@@ -72,6 +73,7 @@ export function sanitizeSettings(raw) {
     currency: CURRENCIES.some((c) => c.code === raw?.currency) ? raw.currency : DEFAULT_CURRENCY,
     dailyBudget: Number.isFinite(budget) && budget > 0 ? round2(budget) : 0,
     soundOn: raw?.soundOn !== false, // default on; only an explicit false mutes
+    plan: sanitizePlan(raw?.plan), // null until the user sets a salary
   };
 }
 
@@ -170,6 +172,14 @@ export function setDailyBudget(amount) {
   persistSettings();
   emit();
   return state.settings.dailyBudget;
+}
+
+/** Save (or clear with null) the monthly plan. @returns {import('./plan.js').Plan | null} */
+export function setPlan(plan) {
+  state.settings = sanitizeSettings({ ...state.settings, plan });
+  persistSettings();
+  emit();
+  return state.settings.plan;
 }
 
 export function toggleSound() {

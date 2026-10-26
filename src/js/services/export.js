@@ -35,5 +35,5 @@ export function downloadText(filename, content, mime = 'text/csv;charset=utf-8')
 }
 
 export function exportTransactionsCsv(transactions, currency) {
-  downloadText(`expenses-${toDateKey()}.csv`, buildTransactionsCsv(transactions, currency));
+  downloadText(`budgetcare-${toDateKey()}.csv`, buildTransactionsCsv(transactions, currency));
 }

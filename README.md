@@ -1,6 +1,6 @@
-# 💰 Budget Tracker
+# 💰 BudgetCare
 
-Mobile-first **Daily Budget & Expense Tracker** for quick, on-the-go entry.
+Mobile-first money planner: set your salary and monthly commitments, get a **suggested daily spending limit**, and track everyday expenses on the go.
 Vanilla HTML + ES modules + Tailwind CDN + Anime.js v4. **No build step**: it deploys straight to GitHub Pages.
 
 ## ✨ Features
@@ -11,6 +11,7 @@ Vanilla HTML + ES modules + Tailwind CDN + Anime.js v4. **No build step**: it de
 | ➕ Quick add | Item, price, optional quantity (1 if empty), category. Live `Total = Price × Qty`. Enter submits |
 | 🧮 Split receipt | Break one expense into receipt lines (Steak 30 + Drink 10 + Dessert 10); the total sums itself, items are saved, searchable, shown in History and exported to CSV |
 | 📊 Overview | Spent Today, This Month, daily average and a per-category breakdown for the month |
+| 🏦 Monthly plan | Enter net salary + fixed commitments (car finance, house, bills). The rest is your flexible balance; BudgetCare suggests a daily limit = (flexible − spent on earlier days) ÷ days left, recalculated every day |
 | 🎯 Daily budget | Progress bar: 🟢 < 80% · 🟡 80–100% · 🔴 > 100%, plus one-tap presets |
 | 📌 Spent-today strip | Shown on every tab with a budget status dot; History tab badge counts today's items |
 | 🧾 History | Grouped by day, category badges, search + category filter, 1-tap delete |
@@ -25,7 +26,7 @@ Vanilla HTML + ES modules + Tailwind CDN + Anime.js v4. **No build step**: it de
 ## 🗂️ Project structure
 
 ```
-budget-tracker/
+budgetcare/
 ├── index.html                  # Markup only: layout + mount points
 ├── manifest.webmanifest        # PWA metadata: name, icons, colours, shortcuts
 ├── sw.js                       # Service worker: offline cache + updates (must live at root for scope)
@@ -40,6 +41,7 @@ budget-tracker/
 │       ├── core/
 │       │   ├── store.js        # State, actions, pub/sub, validation and hydration
 │       │   ├── breakdown.js    # Receipt line items: sanitize, sum, labels
+│       │   ├── plan.js         # Monthly plan: validate + flexible balance + suggested daily limit
 │       │   ├── selectors.js    # Pure derived data (today/month stats, filter, group)
 │       │   └── validation.js   # Pure expense validation shared by Add + Edit
 │       ├── services/
@@ -53,7 +55,9 @@ budget-tracker/
 │       │   ├── install-prompt.js  # Install button, iOS hint, update banner, offline toasts
 │       │   ├── header.js
 │       │   ├── summary-cards.js
-│       │   ├── budget-card.js
+│       │   ├── budget-card.js  # Today vs limit (suggested limit when a plan exists)
+│       │   ├── plan-card.js    # Monthly plan summary on the Budget tab
+│       │   ├── plan-sheet.js   # Bottom sheet to edit salary + commitments
 │       │   ├── expense-form.js
 │       │   ├── edit-sheet.js   # <dialog> bottom sheet for editing an expense
 │       │   ├── category-picker.js  # Reusable category radio group

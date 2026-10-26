@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#020617" />
-  <meta name="description" content="Daily Budget & Expense Tracker — quick on-the-go expense entry with daily budget tracking." />
-  <title>Daily Budget Tracker</title>
+  <meta name="description" content="BudgetCare — plan your month around fixed commitments, get a smart daily spending limit, and track expenses on the go." />
+  <title>BudgetCare</title>
 
   <!-- PWA: installable + offline (see sw.js) -->
   <link rel="manifest" href="manifest.webmanifest" />
@@ -14,7 +14,7 @@
   <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-title" content="Budget" />
+  <meta name="apple-mobile-web-app-title" content="BudgetCare" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
   <script src="https://cdn.tailwindcss.com"></script>
@@ -37,7 +37,7 @@
           <i data-lucide="wallet" class="h-5 w-5"></i>
         </div>
         <div class="min-w-0">
-          <h1 id="panelTitle" class="text-lg font-semibold leading-tight truncate">Daily Budget</h1>
+          <h1 class="text-lg font-semibold leading-tight truncate">BudgetCare</h1>
           <p id="todayLabel" class="text-xs text-slate-400 truncate"></p>
         </div>
       </div>
@@ -198,20 +198,33 @@
     </section>
 
     <!-- ===== Tab: Budget ===== -->
-    <section id="panel-budget" role="tabpanel" aria-labelledby="tab-budget" data-title="Daily Budget" class="tab-panel space-y-3" hidden>
+    <section id="panel-budget" role="tabpanel" aria-labelledby="tab-budget" class="tab-panel space-y-3" hidden>
       <div class="rounded-2xl border border-slate-800 bg-slate-900 p-4">
-        <h2 class="flex items-center gap-1.5 text-sm font-medium mb-3"><i data-lucide="target" class="h-4 w-4 text-slate-400"></i>Today vs Target</h2>
+        <h2 class="flex items-center gap-1.5 text-sm font-medium mb-3"><i data-lucide="target" class="h-4 w-4 text-slate-400"></i><span id="budgetHeading">Today vs Target</span></h2>
         <div id="budgetBody"></div>
       </div>
+
+      <!-- Monthly plan: salary − commitments → suggested daily limit (components/plan-card.js) -->
+      <div class="rounded-2xl border border-slate-800 bg-slate-900 p-4">
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <h2 class="flex items-center gap-1.5 text-sm font-medium"><i data-lucide="landmark" class="h-4 w-4 text-slate-400"></i>Monthly Plan</h2>
+          <button id="planEditBtn" type="button"
+            class="min-h-[44px] px-3 -my-2 -mr-2 rounded-xl text-sm font-medium text-emerald-300 hover:bg-slate-800 flex items-center gap-1.5 transition">
+            <i data-lucide="pencil" class="h-4 w-4"></i><span id="planEditLabel">Set up</span>
+          </button>
+        </div>
+        <div id="planBody"></div>
+      </div>
+
       <form id="budgetForm" class="rounded-2xl border border-slate-800 bg-slate-900 p-4">
-        <label for="budgetInput" class="block text-sm font-medium mb-2">Daily limit (<span data-currency-label>MYR</span>)</label>
+        <label for="budgetInput" class="block text-sm font-medium mb-2">Manual daily limit (<span data-currency-label>MYR</span>)</label>
         <div class="flex gap-2">
           <input id="budgetInput" type="number" inputmode="decimal" step="0.01" min="0" placeholder="e.g. 50.00"
             class="flex-1 min-w-0 min-h-[44px] rounded-xl bg-slate-950 border border-slate-800 px-3 text-base tabular-nums focus:outline-none focus:ring-2 focus:ring-emerald-500" />
           <button type="submit" class="min-h-[44px] px-4 rounded-xl bg-emerald-500 text-slate-950 font-semibold active:scale-95 transition">Save</button>
         </div>
         <div id="budgetPresets" class="mt-3 grid grid-cols-4 gap-2"></div>
-        <p class="mt-3 text-xs text-slate-500">Leave empty or 0 to turn the target off.</p>
+        <p class="mt-3 text-xs text-slate-500">Leave empty or 0 to turn the target off. Setting a monthly plan replaces this with a suggested limit.</p>
       </form>
     </section>
 
@@ -307,6 +320,53 @@
         <button id="editSave" type="submit"
           class="min-h-[48px] rounded-xl bg-emerald-500 text-slate-950 font-semibold flex items-center justify-center gap-2 hover:bg-emerald-400 active:scale-[.98] transition">
           <i data-lucide="check" class="h-5 w-5"></i>Save changes
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- ===== Monthly plan sheet (components/plan-sheet.js) ===== -->
+  <dialog id="planSheet" class="edit-sheet bg-slate-900 text-slate-100 border border-slate-800" aria-labelledby="planTitle">
+    <form id="planForm" method="dialog" class="p-4 pt-2 space-y-3" autocomplete="off" novalidate>
+      <div class="mx-auto h-1.5 w-10 rounded-full bg-slate-700" aria-hidden="true"></div>
+      <div class="flex items-center justify-between gap-2">
+        <h2 id="planTitle" class="flex items-center gap-1.5 text-base font-semibold"><i data-lucide="landmark" class="h-4 w-4 text-emerald-400"></i>Monthly plan</h2>
+        <button id="planClose" type="button" autofocus aria-label="Close"
+          class="min-h-[44px] min-w-[44px] -mr-2 rounded-xl grid place-items-center text-slate-400 hover:text-slate-100 hover:bg-slate-800 transition">
+          <i data-lucide="x" class="h-5 w-5"></i>
+        </button>
+      </div>
+
+      <div>
+        <label for="planSalary" class="block text-xs text-slate-400 mb-1">Net monthly salary (<span data-currency-label>MYR</span>)</label>
+        <input id="planSalary" type="number" inputmode="decimal" step="0.01" min="0" placeholder="e.g. 5000" class="w-full min-h-[44px] rounded-xl bg-slate-950 border border-slate-800 px-3 text-base placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 tabular-nums" />
+      </div>
+
+      <div>
+        <p class="text-xs text-slate-400 mb-1">Monthly commitments <span class="text-slate-500">(fixed, must pay)</span></p>
+        <ul id="planRows" class="space-y-2"></ul>
+        <button id="planAddRow" type="button"
+          class="mt-2 min-h-[44px] px-3 rounded-xl text-sm font-medium text-emerald-300 hover:bg-slate-800 flex items-center gap-1.5 transition">
+          <i data-lucide="plus" class="h-4 w-4"></i>Add commitment
+        </button>
+        <div id="planSuggestions" class="mt-1 flex flex-wrap gap-2"></div>
+      </div>
+
+      <div class="rounded-xl bg-slate-950 border border-slate-800 p-3 space-y-1.5 text-sm tabular-nums" aria-live="polite">
+        <div class="flex justify-between text-slate-400"><span>Commitments</span><span id="planSumCommitted">0.00</span></div>
+        <div class="flex justify-between"><span class="text-slate-400">Left for daily spending</span><span id="planSumFlexible" class="font-semibold">0.00</span></div>
+        <div class="flex justify-between border-t border-slate-800 pt-1.5"><span class="text-slate-400">Suggested daily limit</span><span id="planSumLimit" class="font-bold text-emerald-400">0.00</span></div>
+      </div>
+      <p id="planError" class="hidden text-sm text-rose-400" role="alert"></p>
+
+      <div class="grid grid-cols-[auto_1fr] gap-2 pt-1">
+        <button id="planClear" type="button" aria-label="Clear plan"
+          class="min-h-[48px] min-w-[48px] rounded-xl border border-rose-500/30 text-rose-400 grid place-items-center hover:bg-rose-500/10 active:scale-95 transition">
+          <i data-lucide="trash-2" class="h-5 w-5"></i>
+        </button>
+        <button type="submit"
+          class="min-h-[48px] rounded-xl bg-emerald-500 text-slate-950 font-semibold flex items-center justify-center gap-2 hover:bg-emerald-400 active:scale-[.98] transition">
+          <i data-lucide="check" class="h-5 w-5"></i>Save plan
         </button>
       </div>
     </form>

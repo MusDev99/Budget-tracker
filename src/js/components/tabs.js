@@ -43,7 +43,6 @@ export function activateTab(id, { focusTab = false, updateUrl = true } = {}) {
   });
 
   const panel = byId(`panel-${id}`);
-  byId('panelTitle').textContent = panel.dataset.title ?? 'Daily Budget';
 
   // replaceState: switching tabs shouldn't flood the browser back stack.
   if (updateUrl) history.replaceState(null, '', `#${id}`);
