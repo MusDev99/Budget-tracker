@@ -1,15 +1,22 @@
 {
   "name": "budgetcare",
   "version": "1.0.0",
-  "description": "BudgetCare: monthly plan, smart daily limit and expense tracker. Vanilla ES modules, zero build step.",
+  "description": "BudgetCare: monthly plan, smart daily limit and expense tracker. Vanilla ES modules; the only build step is the committed Tailwind stylesheet.",
   "private": true,
   "type": "module",
   "scripts": {
     "start": "npx --yes serve -l 5173 .",
-    "test": "node --test tests/*.test.js"
+    "build:css": "tailwindcss -c tailwind.config.js -i tailwind/input.css -o src/styles/tailwind.css --minify",
+    "check:css": "npm run build:css && git diff --exit-code -- src/styles/tailwind.css",
+    "check:syntax": "node scripts/check-syntax.js",
+    "test": "node --test tests/*.test.js",
+    "verify": "npm run check:syntax && npm test && npm run check:css"
   },
   "engines": {
     "node": ">=18"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "tailwindcss": "3.4.19"
+  }
 }
