@@ -1,0 +1,7 @@
+/*
+ * Tailwind entry point. Build with `npm run build:css` → src/styles/tailwind.css (committed,
+ * so GitHub Pages serves it with no build step). Custom CSS lives in src/styles/main.css.
+ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

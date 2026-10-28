@@ -1,7 +1,7 @@
 # 💰 BudgetCare
 
 Mobile-first money planner: set your salary and monthly commitments, get a **suggested daily spending limit**, and track everyday expenses on the go.
-Vanilla HTML + ES modules + Tailwind CDN + Anime.js v4. **No build step**: it deploys straight to GitHub Pages.
+Vanilla HTML + ES modules + prebuilt Tailwind CSS + Anime.js v4. **No deploy build**: the Tailwind stylesheet is built once and committed, so the repo deploys straight to GitHub Pages.
 
 ## ✨ Features
 
@@ -35,6 +35,7 @@ budgetcare/
 ├── assets/icons/               # App icons (SVG sources + rendered PNGs)
 ├── src/
 │   ├── styles/
+│   │   ├── tailwind.css        # Built by `npm run build:css` (committed, don't edit)
 │   │   └── main.css            # Custom CSS that Tailwind utilities don't cover
 │   └── js/
 │       ├── main.js             # Entry: init store → mount components → subscribe render
@@ -73,8 +74,13 @@ budgetcare/
 │           ├── dom.js
 │           ├── id.js
 │           └── number.js
+├── tailwind/input.css          # Tailwind entry (@tailwind base/components/utilities)
+├── tailwind.config.js          # Content globs: index.html + src/js/**/*.js
+├── scripts/check-syntax.js     # Zero-dependency lint: every JS file must parse
 ├── tests/                      # node:test unit tests (no dependencies)
-├── package.json                # Dev scripts only (start, test)
+├── .github/                    # CI (verify), branch-policy, PR template
+├── CLAUDE.md                   # Rules for AI agents working on this repo
+├── package.json                # Dev scripts (start, build:css, test, verify)
 ├── .editorconfig
 ├── .gitignore
 └── .nojekyll                   # Serve files as-is on GitHub Pages
@@ -110,7 +116,26 @@ python3 -m http.server 5173
 
 ```bash
 npm test                  # node --test, Node ≥ 18, no install needed
+npm ci && npm run verify  # syntax check + tests + Tailwind build is committed (what CI runs)
 ```
+
+## 🎨 Styling (Tailwind)
+
+Tailwind v3 is compiled ahead of time, not in the browser (the Play CDN is for prototyping only).
+
+1. Use Tailwind classes in `index.html` or JS templates as usual. Write **full class names** (`'text-rose-400'`), never `'text-' + colour`, or the build won't see them.
+2. Run `npm run build:css` and commit `src/styles/tailwind.css` with your change. CI fails if it is stale.
+
+## 🔐 CDN libraries
+
+Lucide and Anime.js load from jsDelivr, pinned to an exact version with **Subresource Integrity** (`integrity="sha384-..."` + `crossorigin="anonymous"`; Anime.js's hash is also in the import map for its dynamic `import()`). A changed file is refused: icons fall back to nothing and animations are skipped, the app keeps working. To upgrade a library, change the version and recompute the hash from the npm package:
+
+```bash
+npm pack lucide@X.Y.Z && tar xzf lucide-X.Y.Z.tgz
+echo "sha384-$(openssl dgst -sha384 -binary package/dist/umd/lucide.min.js | openssl base64 -A)"
+```
+
+`tests/html.test.js` fails if a CDN tag lacks a pinned version, SRI or CORS.
 
 ## 📲 PWA
 
@@ -125,7 +150,7 @@ npm test                  # node --test, Node ≥ 18, no install needed
 |---|---|
 | Page navigation | Network first → cached shell when offline |
 | App files (`APP_SHELL`) | Precached on install, stale-while-revalidate |
-| CDN libs (Tailwind, Lucide, Anime.js) | Stale-while-revalidate runtime cache |
+| CDN libs (Lucide, Anime.js) | Stale-while-revalidate runtime cache (CORS 200s only, so SRI still applies) |
 
 **Release checklist**
 1. Added or renamed a file? Add it to `APP_SHELL` in `sw.js` (`npm test` fails if you forget).
@@ -138,3 +163,5 @@ npm test                  # node --test, Node ≥ 18, no install needed
 ## 🌐 Deploy (GitHub Pages)
 
 Settings → Pages → **Deploy from a branch** → `master` / `(root)`.
+
+Changes reach `master` only through a pull request (see [BRANCHING.md](https://github.com/MusDev99/agentic-coding-style/blob/main/BRANCHING.md)): `fix/`, `feat/`, `chore/` or `docs/` branch, Conventional Commit PR title, `ci / verify` and `branch-policy` green, squash merge.

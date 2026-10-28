@@ -4,12 +4,12 @@
  * Strategies
  *   - Page navigations   → network first, fall back to the cached shell (offline launch)
  *   - App files          → stale-while-revalidate from the versioned precache
- *   - CDN libraries      → stale-while-revalidate in a runtime cache (Tailwind, Lucide, Anime.js)
+ *   - CDN libraries      → stale-while-revalidate in a runtime cache (Lucide, Anime.js; both SRI-pinned)
  *
  * RELEASE: bump CACHE_VERSION whenever any file in APP_SHELL changes, so clients pick up
  * the new files and the in-app "update available" banner appears.
  */
-const CACHE_VERSION = 'v9';
+const CACHE_VERSION = 'v10';
 const SHELL_CACHE = `budget-shell-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `budget-runtime-${CACHE_VERSION}`;
 
@@ -25,6 +25,7 @@ const APP_SHELL = [
   './assets/icons/icon-512.png',
   './assets/icons/icon-maskable-512.png',
   './src/styles/main.css',
+  './src/styles/tailwind.css',
   './src/js/main.js',
   './src/js/components/budget-card.js',
   './src/js/components/category-picker.js',
@@ -58,7 +59,7 @@ const APP_SHELL = [
   './src/js/utils/number.js',
 ];
 
-const CDN_HOSTS = new Set(['cdn.tailwindcss.com', 'unpkg.com', 'cdn.jsdelivr.net']);
+const CDN_HOSTS = new Set(['cdn.jsdelivr.net']);
 
 self.addEventListener('install', (event) => {
   // cache: 'reload' bypasses the HTTP cache so a new version never precaches stale files.
@@ -99,8 +100,8 @@ async function staleWhileRevalidate(request, cacheName) {
   const cached = await cache.match(request, { ignoreSearch: cacheName === SHELL_CACHE });
   const network = fetch(request)
     .then((response) => {
-      // Opaque (no-cors CDN scripts) responses have status 0 but are still usable.
-      if (response.ok || response.type === 'opaque') cache.put(request, response.clone());
+      // CDN scripts are CORS + SRI, so only cache real 200s (an opaque copy would fail the integrity check).
+      if (response.ok) cache.put(request, response.clone());
       return response;
     })
     .catch(() => undefined);
