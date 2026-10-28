@@ -17,11 +17,20 @@
   <meta name="apple-mobile-web-app-title" content="BudgetCare" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lucide@1.61.0/dist/umd/lucide.min.js"></script>
+  <!-- Prebuilt Tailwind (npm run build:css), no runtime CDN compiler. -->
+  <link rel="stylesheet" href="src/styles/tailwind.css" />
   <link rel="stylesheet" href="src/styles/main.css" />
-  <!-- Fetch Anime.js in parallel with the app; motion.js imports it lazily and degrades if it fails. -->
-  <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/animejs@4.5.0/dist/bundles/anime.esm.min.js" crossorigin />
+  <!-- Pinned CDN libraries with Subresource Integrity: a tampered file is refused, never run. -->
+  <script src="https://cdn.jsdelivr.net/npm/lucide@1.61.0/dist/umd/lucide.min.js" integrity="sha384-wx1iBc8a89SnsJAxZPb9eNEoMn4t/Wg111+QJyasxB9Om4SDDtkJeBuXx4NiRwa8" crossorigin="anonymous"></script>
+  <!-- The import map pins Anime.js's hash for motion.js's dynamic import(); the preload fetches it in parallel. -->
+  <script type="importmap">
+    {
+      "integrity": {
+        "https://cdn.jsdelivr.net/npm/animejs@4.5.0/dist/bundles/anime.esm.min.js": "sha384-dUvtnao0svvqLmC/RmuxxBIMGuLoVY2joH2Rd3wq74ZaJkK0zpPvJvtK4daGSDNf"
+      }
+    }
+  </script>
+  <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/animejs@4.5.0/dist/bundles/anime.esm.min.js" integrity="sha384-dUvtnao0svvqLmC/RmuxxBIMGuLoVY2joH2Rd3wq74ZaJkK0zpPvJvtK4daGSDNf" crossorigin="anonymous" />
   <script type="module" src="src/js/main.js"></script>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen antialiased">
