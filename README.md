@@ -29,6 +29,7 @@ Vanilla HTML + ES modules + prebuilt Tailwind CSS + Anime.js v4. **No deploy bui
 
 ```
 budgetcare/
+├── .agents/skills/code-review/ # Shared code-review checklist (all MusDev99 repos)
 ├── index.html                  # Markup only: layout + mount points
 ├── manifest.webmanifest        # PWA metadata: name, icons, colours, shortcuts
 ├── sw.js                       # Service worker: offline cache + updates (must live at root for scope)
