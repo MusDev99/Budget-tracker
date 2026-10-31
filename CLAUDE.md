@@ -31,6 +31,6 @@ npm ci && npm run verify   # syntax check + tests + Tailwind build is committed 
 ## Git (see [BRANCHING.md](https://github.com/MusDev99/agentic-coding-style/blob/main/BRANCHING.md))
 
 - **Never commit or push to `master`** (to be renamed `main`). Branch `feat/`, `fix/`, `chore/` or `docs/` (agent sessions may use their given `claude/` branch), short kebab-case name.
-- Conventional Commits for commits and PR titles (`fix(sw): ...`), enforced by `.github/workflows/branch-policy.yml`. Fill in `.github/pull_request_template.md`.
+- Conventional Commits for commits and PR titles (`fix(sw): ...`), enforced by `.github/workflows/branch-policy.yml`. Fill in `.github/pull_request_template.md`. `.github/workflows/branch-cleanup.yml` deletes the branch after merge.
 - `npm run verify` must pass before every commit; CI (`ci / verify`) must be green before merge. Squash merge, one concern per PR, under ~400 changed lines (the generated `tailwind.css` doesn't count).
 - Update `README.md` in the same PR when behaviour, files or commands change.
