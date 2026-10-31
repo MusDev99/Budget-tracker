@@ -79,7 +79,7 @@ budgetcare/
 ├── tailwind.config.js          # Content globs: index.html + src/js/**/*.js
 ├── scripts/check-syntax.js     # Zero-dependency lint: every JS file must parse
 ├── tests/                      # node:test unit tests (no dependencies)
-├── .github/                    # CI (verify), branch-policy, PR template
+├── .github/                    # CI (verify), branch-policy, branch-cleanup, PR template
 ├── CLAUDE.md                   # Rules for AI agents working on this repo
 ├── package.json                # Dev scripts (start, build:css, test, verify)
 ├── .editorconfig
@@ -165,4 +165,4 @@ echo "sha384-$(openssl dgst -sha384 -binary package/dist/umd/lucide.min.js | ope
 
 Settings → Pages → **Deploy from a branch** → `master` / `(root)`.
 
-Changes reach `master` only through a pull request (see [BRANCHING.md](https://github.com/MusDev99/agentic-coding-style/blob/main/BRANCHING.md)): `fix/`, `feat/`, `chore/` or `docs/` branch, Conventional Commit PR title, `ci / verify` and `branch-policy` green, squash merge.
+Changes reach `master` only through a pull request (see [BRANCHING.md](https://github.com/MusDev99/agentic-coding-style/blob/main/BRANCHING.md)): `fix/`, `feat/`, `chore/` or `docs/` branch, Conventional Commit PR title, `ci / verify` and `branch-policy` green, squash merge. `branch-cleanup.yml` deletes the branch once its PR is merged (keep *Automatically delete head branches* on too).
