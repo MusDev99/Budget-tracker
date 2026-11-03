@@ -7,7 +7,13 @@ export const STORAGE_KEYS = Object.freeze({
   transactions: 'dbt.transactions.v1',
   settings: 'dbt.settings.v1',
   iosHintDismissed: 'dbt.iosHintDismissed.v1',
+  /** Version of the stored data shape (see core/migrations.js). Missing = data from before versioning = 1. */
+  schemaVersion: 'dbt.schemaVersion',
 });
+
+/** Backup files larger than this are rejected before parsing (a year of heavy use is well under 1 MB). */
+export const MAX_BACKUP_BYTES = 5 * 1024 * 1024;
+export const MAX_BACKUP_TRANSACTIONS = 50_000;
 
 export const CURRENCIES = Object.freeze([
   { code: 'MYR', symbol: 'RM' },

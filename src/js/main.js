@@ -1,6 +1,7 @@
 /**
  * App entry point: hydrate the store, mount components, wire re-rendering.
  */
+import * as backupCard from './components/backup-card.js';
 import * as budgetCard from './components/budget-card.js';
 import * as editSheet from './components/edit-sheet.js';
 import * as expenseForm from './components/expense-form.js';
@@ -20,7 +21,7 @@ import { toDateKey } from './utils/date.js';
 import { refreshIcons } from './utils/dom.js';
 
 // Order matters: tabs mount first so the initial activation doesn't trigger other components' tab listeners.
-const components = [tabs, header, summaryCards, unpaidCommitments, budgetCard, planCard, planSheet, expenseForm, transactionList, editSheet, installPrompt];
+const components = [tabs, header, summaryCards, unpaidCommitments, budgetCard, planCard, backupCard, planSheet, expenseForm, transactionList, editSheet, installPrompt];
 
 function renderAll(state = getState()) {
   components.forEach((component) => component.render(state));

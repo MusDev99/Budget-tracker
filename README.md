@@ -24,6 +24,8 @@ Vanilla HTML + ES modules + prebuilt Tailwind CSS + Anime.js v4. **No deploy bui
 | 🪙 Coin hero | 3D money coin on Overview: tosses on a loop with a flip, shadow and sparkle burst; tap to flip with a synthesised coin sound (flick → ching → bounce, mutable); shows the active currency (RM / $) |
 | 📲 PWA | Installable (Android/desktop install button, iOS "Add to Home Screen" hint), works fully offline, in-app update banner |
 | 📤 Export | 1-tap CSV (Excel-friendly; cells that look like formulas are escaped) |
+| 💾 Backup / restore | Budget tab → **Your data**: download everything as a JSON file, restore it on any device. Files are validated and sanitized, and restore asks before replacing your data. Nothing leaves your device |
+| 🔢 Schema versioning | Stored data carries a version (`dbt.schemaVersion`); older data is upgraded by `core/migrations.js` on load, and data from a newer app is never overwritten |
 
 ## 🗂️ Project structure
 
@@ -44,6 +46,8 @@ budgetcare/
 │       │   └── constants.js    # Storage keys, currencies, categories, thresholds
 │       ├── core/
 │       │   ├── store.js        # State, actions, pub/sub, validation and hydration
+│       │   ├── backup.js       # JSON backup: build file + validate/sanitize on restore
+│       │   ├── migrations.js   # Schema version + ordered data migrations
 │       │   ├── breakdown.js    # Receipt line items: sanitize, sum, labels
 │       │   ├── plan.js         # Monthly plan: validate + flexible balance + suggested daily limit
 │       │   ├── selectors.js    # Pure derived data (today/month stats, filter, group)
@@ -61,6 +65,7 @@ budgetcare/
 │       │   ├── summary-cards.js
 │       │   ├── budget-card.js  # Today vs limit (suggested limit when a plan exists)
 │       │   ├── unpaid-commitments.js  # Overview card: unpaid commitments, tap to pay
+│       │   ├── backup-card.js  # Budget tab: back up / restore your data
 │       │   ├── plan-card.js    # Monthly plan summary on the Budget tab
 │       │   ├── plan-sheet.js   # Bottom sheet to edit salary + commitments
 │       │   ├── expense-form.js

@@ -12,6 +12,7 @@ import {
   STORAGE_KEYS,
 } from '../config/constants.js';
 import { sanitizeItems, sumItems } from './breakdown.js';
+import { CURRENT_SCHEMA_VERSION, migrate, normalizeVersion } from './migrations.js';
 import { sanitizePaid, sanitizePlan } from './plan.js';
 import * as storage from '../services/storage.js';
 import { isDateKey, toDateKey } from '../utils/date.js';
@@ -78,12 +79,22 @@ export function sanitizeSettings(raw) {
   };
 }
 
-function loadTransactions() {
-  const raw = storage.read(STORAGE_KEYS.transactions, []);
-  return (Array.isArray(raw) ? raw : []).map(sanitizeTransaction).filter(Boolean);
+/**
+ * Read both collections, upgrading data saved by an older app version. Data written by a
+ * NEWER version is read as-is and left untouched on disk (we never downgrade it).
+ */
+function loadAll() {
+  const stored = { transactions: storage.read(STORAGE_KEYS.transactions, []), settings: storage.read(STORAGE_KEYS.settings, {}) };
+  const savedVersion = storage.read(STORAGE_KEYS.schemaVersion, null);
+  const version = normalizeVersion(savedVersion);
+  const moved = migrate(stored, version);
+  const data = moved.ok ? moved.data : stored;
+  return {
+    transactions: (Array.isArray(data.transactions) ? data.transactions : []).map(sanitizeTransaction).filter(Boolean),
+    settings: sanitizeSettings(data.settings),
+    needsSave: moved.ok && (moved.version !== version || savedVersion == null),
+  };
 }
-
-const loadSettings = () => sanitizeSettings(storage.read(STORAGE_KEYS.settings, {}));
 
 // ---------- Pub/sub ----------
 
@@ -96,22 +107,29 @@ function emit() {
   listeners.forEach((listener) => listener(state));
 }
 
+const persistVersion = () => storage.write(STORAGE_KEYS.schemaVersion, CURRENT_SCHEMA_VERSION);
 const persistTransactions = () => storage.write(STORAGE_KEYS.transactions, state.transactions);
 const persistSettings = () => storage.write(STORAGE_KEYS.settings, state.settings);
 
 // ---------- Public API ----------
 
 export function initStore() {
-  state.transactions = loadTransactions();
-  state.settings = loadSettings();
+  const loaded = loadAll();
+  state.transactions = loaded.transactions;
+  state.settings = loaded.settings;
+  if (loaded.needsSave) {
+    persistTransactions();
+    persistSettings();
+    persistVersion();
+  }
   // Plans saved before commitments had ids get theirs generated on load; persist them once
   // so "paid" ticks stay attached across reloads.
   if (state.settings.plan) persistSettings();
 
   // Keep multiple open tabs in sync.
   window.addEventListener('storage', (event) => {
-    if (event.key === STORAGE_KEYS.transactions) state.transactions = loadTransactions();
-    else if (event.key === STORAGE_KEYS.settings) state.settings = loadSettings();
+    if (event.key === STORAGE_KEYS.transactions) state.transactions = loadAll().transactions;
+    else if (event.key === STORAGE_KEYS.settings) state.settings = loadAll().settings;
     else return;
     emit();
   });
@@ -211,6 +229,20 @@ export function cycleCurrency() {
   state.settings.currency = CURRENCIES[(index + 1) % CURRENCIES.length].code;
   persistSettings();
   emit();
+}
+
+/**
+ * Replace everything with already-validated backup data (see core/backup.js parseBackup).
+ * @returns {{ transactions: number }} how many expenses are now stored
+ */
+export function restoreData({ transactions, settings }) {
+  state.transactions = transactions;
+  state.settings = sanitizeSettings(settings);
+  persistTransactions();
+  persistSettings();
+  persistVersion();
+  emit();
+  return { transactions: state.transactions.length };
 }
 
 /** Force a re-render without changing data (e.g. the date rolled over at midnight). */
