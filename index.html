@@ -245,6 +245,29 @@
         <div id="budgetPresets" class="mt-3 grid grid-cols-4 gap-2"></div>
         <p class="mt-3 text-xs text-slate-500">Leave empty or 0 to turn the target off. Setting a monthly plan replaces this with a suggested limit.</p>
       </form>
+
+      <!-- Backup / restore: JSON file of all data, local only (components/backup-card.js) -->
+      <div class="rounded-2xl border border-slate-800 bg-slate-900 p-4">
+        <h2 class="flex items-center gap-1.5 text-sm font-medium mb-1"><i data-lucide="database-backup" class="h-4 w-4 text-slate-400"></i>Your data</h2>
+        <p id="backupSummary" class="text-xs text-slate-500 mb-3"></p>
+        <div class="grid grid-cols-2 gap-2">
+          <button id="backupBtn" type="button" class="min-h-[44px] rounded-xl bg-emerald-500 text-slate-950 font-semibold flex items-center justify-center gap-1.5 active:scale-95 transition">
+            <i data-lucide="download" class="h-4 w-4"></i>Back up
+          </button>
+          <button id="restoreBtn" type="button" class="min-h-[44px] rounded-xl border border-slate-700 text-slate-200 font-medium flex items-center justify-center gap-1.5 hover:bg-slate-800 active:scale-95 transition">
+            <i data-lucide="upload" class="h-4 w-4"></i>Restore
+          </button>
+        </div>
+        <input id="restoreInput" type="file" accept="application/json,.json" class="hidden" tabindex="-1" aria-hidden="true" />
+        <div id="restoreConfirm" class="hidden mt-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3" role="alertdialog" aria-labelledby="restoreConfirmText">
+          <p id="restoreConfirmText" class="text-sm text-amber-100"></p>
+          <div class="mt-3 grid grid-cols-2 gap-2">
+            <button id="restoreCancelBtn" type="button" class="min-h-[44px] rounded-xl border border-slate-700 text-slate-200 font-medium hover:bg-slate-800 transition">Cancel</button>
+            <button id="restoreConfirmBtn" type="button" class="min-h-[44px] rounded-xl bg-amber-400 text-slate-950 font-semibold active:scale-95 transition">Replace my data</button>
+          </div>
+        </div>
+        <p class="mt-3 text-xs text-slate-500">Saved on this device only. Back up before clearing browser data or changing phone.</p>
+      </div>
     </section>
 
     <!-- ===== Tab: History ===== -->

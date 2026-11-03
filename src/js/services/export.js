@@ -1,4 +1,5 @@
 import { CATEGORY_MAP } from '../config/constants.js';
+import { buildBackup } from '../core/backup.js';
 import { itemsToText } from '../core/breakdown.js';
 import { toCsv } from '../utils/csv.js';
 import { formatClock24, toDateKey } from '../utils/date.js';
@@ -36,4 +37,8 @@ export function downloadText(filename, content, mime = 'text/csv;charset=utf-8')
 
 export function exportTransactionsCsv(transactions, currency) {
   downloadText(`budgetcare-${toDateKey()}.csv`, buildTransactionsCsv(transactions, currency));
+}
+
+export function exportBackupJson({ transactions, settings }) {
+  downloadText(`budgetcare-backup-${toDateKey()}.json`, buildBackup({ transactions, settings }), 'application/json');
 }

@@ -9,7 +9,7 @@
  * RELEASE: bump CACHE_VERSION whenever any file in APP_SHELL changes, so clients pick up
  * the new files and the in-app "update available" banner appears.
  */
-const CACHE_VERSION = 'v10';
+const CACHE_VERSION = 'v11';
 const SHELL_CACHE = `budget-shell-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `budget-runtime-${CACHE_VERSION}`;
 
@@ -27,6 +27,7 @@ const APP_SHELL = [
   './src/styles/main.css',
   './src/styles/tailwind.css',
   './src/js/main.js',
+  './src/js/components/backup-card.js',
   './src/js/components/budget-card.js',
   './src/js/components/category-picker.js',
   './src/js/components/edit-sheet.js',
@@ -42,7 +43,9 @@ const APP_SHELL = [
   './src/js/components/transaction-list.js',
   './src/js/components/unpaid-commitments.js',
   './src/js/config/constants.js',
+  './src/js/core/backup.js',
   './src/js/core/breakdown.js',
+  './src/js/core/migrations.js',
   './src/js/core/plan.js',
   './src/js/core/selectors.js',
   './src/js/core/store.js',
